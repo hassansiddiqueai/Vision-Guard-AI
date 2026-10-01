@@ -21,9 +21,8 @@ import { InspectionResultsPage } from './pages/InspectionResultsPage';
 import { LiveMonitoringPage } from './pages/LiveMonitoringPage';
 import { InspectionEnginePage } from './pages/InspectionEnginePage';
 import { IncidentsPage } from './pages/IncidentsPage';
-import { EvidenceGalleryPage } from './pages/EvidenceGalleryPage';
-import { HazardsPage } from './pages/HazardsPage';
-import { CompliancePage } from './pages/CompliancePage';
+import { SiteMapPage } from './pages/SiteMapPage';
+import { AnalyticsPage } from './pages/AnalyticsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -51,27 +50,31 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              {/* Primary Routes */}
+              {/* 8 Core Navigation Routes */}
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/live-monitoring" element={<LiveMonitoringPage />} />
-              <Route path="/monitoring" element={<LiveMonitoringPage />} />
-              <Route path="/inspection-engine" element={<InspectionEnginePage />} />
+              <Route path="/cameras" element={<Navigate to="/live-monitoring" replace />} />
               <Route path="/inspections" element={<InspectionsListPage />} />
               <Route path="/inspections/new" element={<NewInspectionPage />} />
               <Route path="/inspections/:id" element={<InspectionResultsPage />} />
               <Route path="/incidents" element={<IncidentsPage />} />
-              <Route path="/evidence" element={<EvidenceGalleryPage />} />
-              <Route path="/hazards" element={<HazardsPage />} />
-              <Route path="/compliance" element={<CompliancePage />} />
+              <Route path="/events" element={<Navigate to="/incidents" replace />} />
+              <Route path="/site-map" element={<SiteMapPage />} />
+              <Route path="/map" element={<Navigate to="/site-map" replace />} />
               <Route path="/reports" element={<ReportsPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+
+              {/* Workflows & Profile */}
+              <Route path="/inspection-engine" element={<InspectionEnginePage />} />
+              <Route path="/profile" element={<ProfilePage />} />
 
               {/* Backward compatibility aliases */}
               <Route path="/inspect" element={<Navigate to="/inspections/new" replace />} />
               <Route path="/inspection/:id" element={<InspectionResultsPage />} />
               <Route path="/history" element={<Navigate to="/inspections" replace />} />
-              <Route path="/analytics" element={<Navigate to="/compliance" replace />} />
+              <Route path="/hazards" element={<Navigate to="/incidents" replace />} />
+              <Route path="/compliance" element={<Navigate to="/analytics" replace />} />
             </Route>
 
             {/* Fallback 404 Route */}
@@ -85,3 +88,4 @@ function App() {
 }
 
 export default App;
+

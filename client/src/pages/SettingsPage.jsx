@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useInspections } from '../context/InspectionContext';
 import {
   Bell,
-  Eye,
   Sliders,
   CheckCircle2,
   RotateCcw,
+  Shield,
+  Layers,
 } from 'lucide-react';
 
 export const SettingsPage = () => {
@@ -21,7 +22,7 @@ export const SettingsPage = () => {
       showCoordinatesOnScan: true,
       browserAudioAlerts: true,
       confidenceThreshold: 75,
-      defaultSite: 'Apex Tower — Zone B',
+      defaultSite: 'Apex Tower Project',
     };
   });
 
@@ -48,38 +49,38 @@ export const SettingsPage = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
+    <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#243247]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200">
         <div>
-          <h1 className="text-[22px] sm:text-[24px] font-semibold text-[#F1F5F9] tracking-tight">
-            Settings
+          <h1 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
+            System & Optical Engine Settings
           </h1>
-          <p className="text-[13px] text-[#94A3B8] mt-0.5">
-            Configure system parameters, alert thresholds, and operational preferences.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Configure computer vision neural thresholds, virtual zone alerts, and system parameters.
           </p>
         </div>
 
         {savedFeedback && (
-          <span className="text-[12px] text-[#22C55E] font-medium flex items-center gap-1">
+          <span className="text-xs text-emerald-700 font-medium flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Saved</span>
+            <span>Settings Saved</span>
           </span>
         )}
       </div>
 
       {/* Vision Engine Settings */}
       <div className="vg-card p-4 space-y-3">
-        <h2 className="text-[14px] font-semibold text-[#F1F5F9] flex items-center gap-2">
-          <Sliders className="w-4 h-4 text-[#22C7E8]" />
-          <span>Vision Engine Parameters</span>
+        <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+          <Sliders className="w-4 h-4 text-slate-700" />
+          <span>Computer Vision Detection Parameters</span>
         </h2>
 
-        <div className="space-y-3 text-[13px] pt-1 border-t border-[#243247]">
+        <div className="space-y-4 text-xs pt-2 border-t border-slate-200">
           <div>
-            <div className="flex justify-between mb-1 text-[#94A3B8]">
-              <span>Minimum Confidence Threshold</span>
-              <strong className="text-[#F1F5F9] font-mono">{settings.confidenceThreshold}%</strong>
+            <div className="flex justify-between mb-1.5 text-slate-700">
+              <span className="font-medium">Minimum Neural Confidence Filter Threshold</span>
+              <strong className="font-mono text-slate-900">{settings.confidenceThreshold}%</strong>
             </div>
             <input
               type="range"
@@ -88,20 +89,23 @@ export const SettingsPage = () => {
               step="5"
               value={settings.confidenceThreshold}
               onChange={(e) => handleChange('confidenceThreshold', Number(e.target.value))}
-              className="w-full h-1.5 bg-[#0B1220] rounded appearance-none cursor-pointer accent-[#22C7E8]"
+              className="w-full h-1.5 bg-slate-200 rounded appearance-none cursor-pointer accent-sky-600"
             />
+            <span className="text-[11px] text-slate-500 mt-1 block">
+              Detections below this threshold require human supervisory confirmation before escalation.
+            </span>
           </div>
 
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
             <div>
-              <span className="text-[#F1F5F9] font-medium block">Show Bounding Box Annotations</span>
-              <span className="text-[11px] text-[#94A3B8]">Display spatial defect labels directly over visual canvas.</span>
+              <span className="text-slate-800 font-medium block">Live Bounding Box Overlays</span>
+              <span className="text-[11px] text-slate-500">Render spatial defect bounding frames over CCTV stream canvases.</span>
             </div>
             <input
               type="checkbox"
               checked={settings.showCoordinatesOnScan}
               onChange={() => handleToggle('showCoordinatesOnScan')}
-              className="w-4 h-4 accent-[#22C7E8]"
+              className="w-4 h-4 accent-sky-600"
             />
           </div>
         </div>
@@ -109,22 +113,22 @@ export const SettingsPage = () => {
 
       {/* Notification Alerts */}
       <div className="vg-card p-4 space-y-3">
-        <h2 className="text-[14px] font-semibold text-[#F1F5F9] flex items-center gap-2">
-          <Bell className="w-4 h-4 text-[#22C7E8]" />
-          <span>Alert Notifications</span>
+        <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+          <Bell className="w-4 h-4 text-slate-700" />
+          <span>Audio Alert Configuration</span>
         </h2>
 
-        <div className="space-y-3 text-[13px] pt-1 border-t border-[#243247]">
+        <div className="space-y-3 text-xs pt-2 border-t border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[#F1F5F9] font-medium block">Web Audio Hazard Chimes</span>
-              <span className="text-[11px] text-[#94A3B8]">Sound audible chimes when Critical or High risks are detected.</span>
+              <span className="text-slate-800 font-medium block">Audible Field Siren / Warning Chimes</span>
+              <span className="text-[11px] text-slate-500">Play web audio notification sound upon Critical or High risk detection events.</span>
             </div>
             <input
               type="checkbox"
               checked={settings.browserAudioAlerts}
               onChange={() => handleToggle('browserAudioAlerts')}
-              className="w-4 h-4 accent-[#22C7E8]"
+              className="w-4 h-4 accent-sky-600"
             />
           </div>
         </div>
@@ -132,24 +136,24 @@ export const SettingsPage = () => {
 
       {/* Demo Maintenance */}
       <div className="vg-card p-4 space-y-3">
-        <h2 className="text-[14px] font-semibold text-[#F1F5F9] flex items-center gap-2">
-          <RotateCcw className="w-4 h-4 text-[#22C7E8]" />
-          <span>Demo Data Maintenance</span>
+        <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+          <RotateCcw className="w-4 h-4 text-slate-700" />
+          <span>Hackathon Demo Data Management</span>
         </h2>
 
-        <div className="flex items-center justify-between pt-1 border-t border-[#243247] text-[13px]">
+        <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-xs">
           <div>
-            <span className="text-[#F1F5F9] font-medium block">Reset Application Demo State</span>
-            <span className="text-[11px] text-[#94A3B8]">Restore seed inspections, incidents, and camera statuses to default baseline.</span>
+            <span className="text-slate-800 font-medium block">Reset Application Demo State</span>
+            <span className="text-[11px] text-slate-500">Restore default seed inspections, live streams, and incident registers.</span>
           </div>
           <button
             onClick={() => {
-              if (window.confirm('Reset all demo state to default?')) {
+              if (window.confirm('Reset all demo state to default baseline?')) {
                 resetDemo();
                 alert('Demo state reset successfully.');
               }
             }}
-            className="vg-btn-secondary text-[12px]"
+            className="vg-btn-secondary text-xs"
           >
             Reset Demo Data
           </button>
@@ -158,3 +162,4 @@ export const SettingsPage = () => {
     </div>
   );
 };
+

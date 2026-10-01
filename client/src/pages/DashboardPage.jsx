@@ -1,345 +1,324 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useInspections } from '../context/InspectionContext';
+import { Link } from 'react-router-dom';
 import {
-  ClipboardList,
+  Camera,
   AlertTriangle,
-  Flame,
   ShieldCheck,
-  Plus,
-  ChevronRight,
-  Activity,
-  Award,
-  CheckCircle2,
+  CheckCircle,
   Clock,
-  RotateCcw,
+  ArrowRight,
+  TrendingUp,
+  Activity,
+  Maximize2,
+  HardHat,
+  Bot,
+  Layers,
+  MapPin,
+  RefreshCw,
 } from 'lucide-react';
+import { useInspections } from '../context/InspectionContext';
+import { RiskBadge } from '../components/common/RiskBadge';
+import { DemoScenarioToolbar } from '../components/common/DemoScenarioToolbar';
+import { IncidentModal } from '../components/common/IncidentModal';
 
 export const DashboardPage = () => {
-  const { inspections, getStats, resetDemo } = useInspections();
-  const navigate = useNavigate();
-  const [selectedSiteFilter, setSelectedSiteFilter] = useState('ALL');
-  const [chartRange, setChartRange] = useState('7d');
+  const { inspections, incidents, cameras, getStats, setIsAssistantOpen } = useInspections();
+  const [selectedIncident, setSelectedIncident] = useState(null);
 
   const stats = getStats();
 
-  const filteredInspections = inspections.filter((insp) => {
-    if (selectedSiteFilter === 'ALL') return true;
-    return insp.site.includes(selectedSiteFilter);
-  });
-
-  const getRiskBadge = (severity) => {
-    const s = (severity || 'LOW').toUpperCase();
-    if (s === 'CRITICAL') return <span className="vg-badge-critical">CRITICAL</span>;
-    if (s === 'HIGH') return <span className="vg-badge-high">HIGH</span>;
-    if (s === 'MEDIUM') return <span className="vg-badge-medium">MEDIUM</span>;
-    return <span className="vg-badge-safe">LOW</span>;
+  const handleOpenIncident = (inc) => {
+    setSelectedIncident(inc);
   };
 
-  const activityDays = chartRange === '7d'
-    ? [
-        { day: 'Mon', count: 18 },
-        { day: 'Tue', count: 24 },
-        { day: 'Wed', count: 32 },
-        { day: 'Thu', count: 28 },
-        { day: 'Fri', count: 35 },
-        { day: 'Sat', count: 20 },
-        { day: 'Sun', count: 15 },
-      ]
-    : chartRange === '30d'
-    ? [
-        { day: 'Week 1', count: 95 },
-        { day: 'Week 2', count: 120 },
-        { day: 'Week 3', count: 140 },
-        { day: 'Week 4', count: 110 },
-      ]
-    : [
-        { day: 'Jul', count: 380 },
-        { day: 'Aug', count: 420 },
-        { day: 'Sep', count: 460 },
-      ];
-
-  const maxVolume = Math.max(...activityDays.map((d) => d.count), 40);
-
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#243247]">
+    <div className="space-y-6">
+      {/* Demo Scenario Bar */}
+      <DemoScenarioToolbar />
+
+      {/* Dashboard Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-200">
         <div>
-          <h1 className="text-[22px] sm:text-[24px] font-semibold text-[#F1F5F9] tracking-tight">
-            Dashboard Overview
-          </h1>
-          <p className="text-[13px] text-[#94A3B8] mt-0.5">
-            Monitor inspections, hazards, and corrective actions across active sites.
+          <h1 className="text-xl sm:text-2xl font-semibold text-slate-900">Safety Operations Dashboard</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Continuous computer vision monitoring, active risk classification, and incident resolution tracking.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Site Filter */}
-          <select
-            value={selectedSiteFilter}
-            onChange={(e) => setSelectedSiteFilter(e.target.value)}
-            className="py-1.5 px-2.5 bg-[#111C2E] border border-[#243247] rounded-md text-[13px] text-[#F1F5F9] focus:outline-none focus:border-[#22C7E8]"
+          <button
+            onClick={() => setIsAssistantOpen(true)}
+            className="vg-btn-secondary text-xs"
           >
-            <option value="ALL">All Sites</option>
-            <option value="Apex Tower">Apex Tower</option>
-            <option value="Harbor Gateway">Harbor Gateway</option>
-            <option value="Eastside Medical">Eastside Medical</option>
-            <option value="Industrial Park">Industrial Park</option>
-          </select>
-
-          <Link to="/inspections/new" className="vg-btn-primary">
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>New Inspection</span>
+            <Bot className="w-3.5 h-3.5 text-sky-600" />
+            <span>AI Safety Assistant</span>
+          </button>
+          <Link to="/inspections/new" className="vg-btn-primary text-xs">
+            <span>+ New Inspection</span>
           </Link>
         </div>
       </div>
 
-      {/* 4 Clean Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {/* Total Inspections */}
-        <div className="vg-card p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-[#94A3B8] text-[12px] font-medium">
-            <span>Total Inspections</span>
-            <ClipboardList className="w-4 h-4 text-[#64748B]" />
-          </div>
-          <div className="my-1.5">
-            <span className="text-[26px] font-semibold text-[#F1F5F9] leading-none">
-              {stats.total}
-            </span>
-          </div>
-          <span className="text-[12px] text-[#22C55E] font-medium">+12% this week</span>
-        </div>
-
-        {/* Critical Hazards */}
-        <div className="vg-card p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-[#94A3B8] text-[12px] font-medium">
-            <span>Critical Hazards</span>
-            <Flame className="w-4 h-4 text-[#EF4444]" />
-          </div>
-          <div className="my-1.5">
-            <span className="text-[26px] font-semibold text-[#EF4444] leading-none">
-              {stats.criticalHazards}
-            </span>
-          </div>
-          <span className="text-[12px] text-[#94A3B8]">Requires immediate action</span>
-        </div>
-
-        {/* Open Issues */}
-        <div className="vg-card p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-[#94A3B8] text-[12px] font-medium">
-            <span>Open Issues</span>
-            <AlertTriangle className="w-4 h-4 text-[#F59E0B]" />
-          </div>
-          <div className="my-1.5">
-            <span className="text-[26px] font-semibold text-[#F59E0B] leading-none">
-              {stats.openIssues}
-            </span>
-          </div>
-          <span className="text-[12px] text-[#94A3B8]">Assigned to site leads</span>
-        </div>
-
-        {/* Safety Score */}
-        <div className="vg-card p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-[#94A3B8] text-[12px] font-medium">
-            <span>Safety Score</span>
-            <Award className="w-4 h-4 text-[#22C7E8]" />
-          </div>
-          <div className="my-1.5">
-            <span className="text-[26px] font-semibold text-[#F1F5F9] leading-none">
-              {stats.siteSafetyScore}
-              <span className="text-[14px] font-normal text-[#94A3B8]"> / 100</span>
-            </span>
-          </div>
-          <span className="text-[12px] text-[#22C55E] font-medium">Site compliant</span>
-        </div>
-      </div>
-
-      {/* Main Grid: Activity Chart + Hazard Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Left 8 Cols: Activity Chart */}
-        <div className="lg:col-span-8 vg-card p-4 space-y-3">
+      {/* Safety Overview: 5 Key Operational Metric Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="vg-card p-3.5">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-[15px] font-semibold text-[#F1F5F9]">Inspection Activity</h2>
-              <p className="text-[12px] text-[#94A3B8]">Weekly inspection volume over time</p>
-            </div>
-
-            {/* Time range tabs */}
-            <div className="flex items-center gap-1 bg-[#0B1220] p-0.5 rounded border border-[#243247] text-[11px]">
-              {['7d', '30d', '90d'].map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setChartRange(r)}
-                  className={`px-2 py-0.5 rounded transition ${
-                    chartRange === r
-                      ? 'bg-[#1E293B] text-[#F1F5F9] font-medium'
-                      : 'text-[#94A3B8] hover:text-[#F1F5F9]'
-                  }`}
-                >
-                  {r.toUpperCase()}
-                </button>
-              ))}
-            </div>
+            <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wider">Cameras Online</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
           </div>
-
-          {/* Simple Clean Bar Chart */}
-          <div className="pt-4 h-44 flex items-end justify-between gap-2 px-1 border-b border-[#243247]">
-            {activityDays.map((item, idx) => {
-              const heightPct = Math.round((item.count / maxVolume) * 100);
-              return (
-                <div key={idx} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
-                  <div className="w-full flex items-end justify-center h-full">
-                    <div
-                      style={{ height: `${heightPct}%` }}
-                      className="w-full max-w-[28px] bg-[#1E293B] group-hover:bg-[#22C7E8] transition-colors rounded-t"
-                    />
-                  </div>
-                  <span className="text-[11px] text-[#94A3B8]">{item.day}</span>
-                </div>
-              );
-            })}
+          <div className="mt-2 flex items-baseline gap-1">
+            <span className="text-2xl font-bold font-mono text-slate-900">{stats.onlineCamerasCount}</span>
+            <span className="text-xs text-slate-400">/ {stats.totalCamerasCount}</span>
           </div>
-
-          <div className="flex items-center justify-between text-[12px] text-[#94A3B8] pt-1">
-            <span>Average Resolution Time: <strong className="text-[#F1F5F9]">1.8 hrs</strong></span>
-            <span>PPE Compliance Rate: <strong className="text-[#22C55E]">92.4%</strong></span>
-          </div>
+          <span className="text-[11px] text-emerald-700 mt-0.5 block font-medium">100% Core Streams Active</span>
         </div>
 
-        {/* Right 4 Cols: Hazard Distribution */}
-        <div className="lg:col-span-4 vg-card p-4 space-y-3">
-          <div>
-            <h2 className="text-[15px] font-semibold text-[#F1F5F9]">Hazard Distribution</h2>
-            <p className="text-[12px] text-[#94A3B8]">Breakdown by severity status</p>
+        <div className="vg-card p-3.5">
+          <div className="flex items-center justify-between">
+            <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wider">Active Inspections</span>
+            <Activity className="w-3.5 h-3.5 text-slate-400" />
           </div>
-
-          <div className="space-y-2.5 text-[12px]">
-            {/* Critical */}
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-[#EF4444] font-medium">Critical</span>
-                <span className="text-[#F1F5F9]">{stats.riskCounts.CRITICAL}</span>
-              </div>
-              <div className="h-1.5 rounded-full bg-[#0B1220] overflow-hidden">
-                <div
-                  className="h-full bg-[#EF4444] rounded-full"
-                  style={{ width: `${Math.min(100, stats.riskCounts.CRITICAL * 25)}%` }}
-                />
-              </div>
-            </div>
-
-            {/* High */}
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-[#F59E0B] font-medium">High</span>
-                <span className="text-[#F1F5F9]">{stats.riskCounts.HIGH}</span>
-              </div>
-              <div className="h-1.5 rounded-full bg-[#0B1220] overflow-hidden">
-                <div
-                  className="h-full bg-[#F59E0B] rounded-full"
-                  style={{ width: `${Math.min(100, stats.riskCounts.HIGH * 25)}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Medium */}
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-[#EAB308] font-medium">Medium</span>
-                <span className="text-[#F1F5F9]">{stats.riskCounts.MEDIUM}</span>
-              </div>
-              <div className="h-1.5 rounded-full bg-[#0B1220] overflow-hidden">
-                <div
-                  className="h-full bg-[#EAB308] rounded-full"
-                  style={{ width: `${Math.min(100, stats.riskCounts.MEDIUM * 25)}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Low / Safe */}
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-[#22C55E] font-medium">Low / Safe</span>
-                <span className="text-[#F1F5F9]">{stats.riskCounts.LOW + stats.riskCounts.SAFE}</span>
-              </div>
-              <div className="h-1.5 rounded-full bg-[#0B1220] overflow-hidden">
-                <div className="h-full bg-[#22C55E] rounded-full" style={{ width: '85%' }} />
-              </div>
-            </div>
+          <div className="mt-2">
+            <span className="text-2xl font-bold font-mono text-slate-900">{stats.total}</span>
           </div>
+          <span className="text-[11px] text-slate-500 mt-0.5 block">Audit Records Logged</span>
+        </div>
+
+        <div className="vg-card p-3.5 border-l-4 border-l-red-600">
+          <div className="flex items-center justify-between">
+            <span className="text-slate-600 text-[11px] font-medium uppercase tracking-wider">Critical Risks</span>
+            <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+          </div>
+          <div className="mt-2 flex items-baseline gap-1.5">
+            <span className="text-2xl font-bold font-mono text-red-600">{stats.criticalHazards}</span>
+            <span className="text-xs text-red-700 font-medium">Requires Action</span>
+          </div>
+          <span className="text-[11px] text-red-600 mt-0.5 block">Immediate field halt threshold</span>
+        </div>
+
+        <div className="vg-card p-3.5 border-l-4 border-l-orange-500">
+          <div className="flex items-center justify-between">
+            <span className="text-slate-600 text-[11px] font-medium uppercase tracking-wider">Warnings</span>
+            <AlertTriangle className="w-3.5 h-3.5 text-orange-500" />
+          </div>
+          <div className="mt-2">
+            <span className="text-2xl font-bold font-mono text-orange-600">{stats.warningHazards}</span>
+          </div>
+          <span className="text-[11px] text-slate-500 mt-0.5 block">Medium & High severity</span>
+        </div>
+
+        <div className="vg-card p-3.5 border-l-4 border-l-emerald-600">
+          <div className="flex items-center justify-between">
+            <span className="text-slate-600 text-[11px] font-medium uppercase tracking-wider">Resolved Today</span>
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+          </div>
+          <div className="mt-2">
+            <span className="text-2xl font-bold font-mono text-emerald-700">{stats.resolvedTodayCount}</span>
+          </div>
+          <span className="text-[11px] text-emerald-700 mt-0.5 block">Verified & closed</span>
         </div>
       </div>
 
-      {/* Recent Inspections Table */}
-      <div className="vg-card p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-[15px] font-semibold text-[#F1F5F9]">Recent Inspections</h2>
-            <p className="text-[12px] text-[#94A3B8]">Latest audits conducted across active sites</p>
+      {/* Live Camera Grid (Compact CCTV Matrix) */}
+      <div className="vg-card p-4">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+          <div className="flex items-center gap-2">
+            <Camera className="w-4 h-4 text-slate-700" />
+            <h2 className="text-sm font-semibold text-slate-900">Live CCTV Stream Matrix</h2>
+            <span className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded border border-slate-200">
+              SIMULATED HACKATHON FEEDS
+            </span>
           </div>
-          <Link
-            to="/inspections"
-            className="text-[13px] font-medium text-[#22C7E8] hover:underline flex items-center gap-1"
-          >
-            <span>View all inspections</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+          <Link to="/live-monitoring" className="text-xs text-sky-600 hover:text-sky-700 font-medium flex items-center gap-1">
+            View All Fullscreen <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-[13px]">
-            <thead className="text-[#94A3B8] text-[11px] uppercase font-medium border-b border-[#243247]">
-              <tr>
-                <th className="py-2 px-3">Inspection ID</th>
-                <th className="py-2 px-3">Site</th>
-                <th className="py-2 px-3">Date</th>
-                <th className="py-2 px-3">Inspector</th>
-                <th className="py-2 px-3">Risk Level</th>
-                <th className="py-2 px-3">Confidence</th>
-                <th className="py-2 px-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#243247]/60">
-              {filteredInspections.slice(0, 5).map((insp) => (
-                <tr
-                  key={insp.id}
-                  onClick={() => navigate(`/inspections/${insp.id}`)}
-                  className="hover:bg-[#16243B] transition-colors cursor-pointer"
-                >
-                  <td className="py-2.5 px-3 font-mono font-medium text-[#22C7E8]">
-                    {insp.id}
-                  </td>
-                  <td className="py-2.5 px-3 text-[#F1F5F9] font-medium">
-                    {insp.site}
-                  </td>
-                  <td className="py-2.5 px-3 text-[#94A3B8]">
-                    {new Date(insp.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </td>
-                  <td className="py-2.5 px-3 text-[#94A3B8]">
-                    {insp.inspector || 'Safety Inspector'}
-                  </td>
-                  <td className="py-2.5 px-3">
-                    {getRiskBadge(insp.riskLevel)}
-                  </td>
-                  <td className="py-2.5 px-3 font-mono text-[#F1F5F9]">
-                    {insp.overallConfidence || 95}%
-                  </td>
-                  <td className="py-2.5 px-3 text-right">
-                    <Link
-                      to={`/inspections/${insp.id}`}
-                      className="vg-btn-secondary py-1 px-2.5 text-[12px]"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      View
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+          {cameras.slice(0, 4).map((cam) => (
+            <div key={cam.id} className="border border-slate-200 rounded overflow-hidden bg-slate-50 flex flex-col">
+              <div className="relative aspect-video bg-slate-900">
+                <img
+                  src={cam.feedUrl}
+                  alt={cam.name}
+                  className="w-full h-full object-cover opacity-90"
+                />
+                <div className="absolute top-2 left-2 flex items-center gap-1.5 px-1.5 py-0.5 bg-slate-900/80 rounded text-[10px] font-mono text-white">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>LIVE</span>
+                </div>
+                <div className="absolute top-2 right-2">
+                  <RiskBadge level={cam.currentRisk} size="sm" />
+                </div>
+                <div className="absolute bottom-1 left-2 right-2 flex justify-between text-[10px] font-mono text-slate-300 bg-slate-950/70 px-1.5 py-0.5 rounded">
+                  <span>{cam.id}</span>
+                  <span>{cam.fps} FPS</span>
+                </div>
+              </div>
+
+              <div className="p-2.5 flex-1 flex flex-col justify-between text-xs">
+                <div>
+                  <h3 className="font-semibold text-slate-800 truncate">{cam.name}</h3>
+                  <p className="text-[11px] text-slate-500 truncate">{cam.site}</p>
+                </div>
+                <div className="mt-2 pt-2 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
+                  <span>Detections: <strong>{cam.activeDetections}</strong></span>
+                  <Link to="/live-monitoring" className="text-sky-600 font-medium hover:underline">
+                    Inspect Feed
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Operational Middle Grid: Recent Critical Events & Safety Trend */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Critical Events Table */}
+        <div className="lg:col-span-2 vg-card p-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900">Recent Critical & High Risk Events</h2>
+              <p className="text-[11px] text-slate-500">Events requiring immediate field acknowledgement or verification.</p>
+            </div>
+            <Link to="/incidents" className="text-xs text-sky-600 hover:text-sky-700 font-medium">
+              View All Events ({incidents.length})
+            </Link>
+          </div>
+
+          <div className="overflow-x-auto mt-3">
+            <table className="w-full text-xs text-left">
+              <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
+                <tr>
+                  <th className="py-2 px-3 font-medium">Event ID</th>
+                  <th className="py-2 px-3 font-medium">Hazard</th>
+                  <th className="py-2 px-3 font-medium">Site / Location</th>
+                  <th className="py-2 px-3 font-medium">Severity</th>
+                  <th className="py-2 px-3 font-medium">Lifecycle</th>
+                  <th className="py-2 px-3 font-medium text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {incidents.slice(0, 5).map((inc) => (
+                  <tr key={inc.id} className="hover:bg-slate-50 transition">
+                    <td className="py-2.5 px-3 font-mono text-slate-600 font-medium">{inc.id}</td>
+                    <td className="py-2.5 px-3 font-medium text-slate-900 max-w-[180px] truncate">{inc.hazard}</td>
+                    <td className="py-2.5 px-3 text-slate-600 max-w-[140px] truncate">{inc.site}</td>
+                    <td className="py-2.5 px-3">
+                      <RiskBadge level={inc.severity} size="sm" />
+                    </td>
+                    <td className="py-2.5 px-3 font-medium">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-mono ${
+                        inc.status === 'CLOSED'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : inc.status === 'VERIFICATION'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : 'bg-red-50 text-red-700 border border-red-200'
+                      }`}>
+                        {inc.status}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3 text-right">
+                      <button
+                        onClick={() => handleOpenIncident(inc)}
+                        className="text-sky-600 hover:text-sky-700 font-medium"
+                      >
+                        Manage
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Top Hazards & Camera Health */}
+        <div className="space-y-6">
+          {/* Top Recurring Hazards */}
+          <div className="vg-card p-4">
+            <h2 className="text-sm font-semibold text-slate-900 pb-2 border-b border-slate-200">
+              Top Monitored Hazards
+            </h2>
+            <div className="mt-3 space-y-2.5 text-xs">
+              <div>
+                <div className="flex justify-between text-slate-700 mb-1">
+                  <span>Scaffolding Structural Void</span>
+                  <span className="font-mono font-medium">38%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded h-1.5">
+                  <div className="bg-red-600 h-1.5 rounded" style={{ width: '38%' }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-slate-700 mb-1">
+                  <span>Machinery Envelope Proximity</span>
+                  <span className="font-mono font-medium">27%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded h-1.5">
+                  <div className="bg-orange-500 h-1.5 rounded" style={{ width: '27%' }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-slate-700 mb-1">
+                  <span>Uncapped Rebar Impalement</span>
+                  <span className="font-mono font-medium">19%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded h-1.5">
+                  <div className="bg-amber-500 h-1.5 rounded" style={{ width: '19%' }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-slate-700 mb-1">
+                  <span>PPE Vest / Helmet Compliance</span>
+                  <span className="font-mono font-medium">16%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded h-1.5">
+                  <div className="bg-sky-600 h-1.5 rounded" style={{ width: '16%' }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Camera Health Monitor */}
+          <div className="vg-card p-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+              <h2 className="text-sm font-semibold text-slate-900">Camera Health Status</h2>
+              <span className="text-[11px] text-slate-500 font-mono">ALL SENSORS</span>
+            </div>
+            <div className="mt-3 space-y-2 text-xs">
+              {cameras.map((c) => (
+                <div key={c.id} className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
+                  <div>
+                    <span className="font-medium text-slate-800 block">{c.id}</span>
+                    <span className="text-[11px] text-slate-500 truncate max-w-[140px] block">{c.name}</span>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${
+                      c.status === 'ONLINE'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-amber-50 text-amber-700 border border-amber-200'
+                    }`}
+                  >
+                    {c.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {selectedIncident && (
+        <IncidentModal
+          incident={selectedIncident}
+          onClose={() => setSelectedIncident(null)}
+        />
+      )}
     </div>
   );
 };
