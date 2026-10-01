@@ -5,25 +5,15 @@ import { DEMO_SCENARIOS, captureEvidenceFrame } from '../services/visionEngine';
 import { soundEngine } from '../services/riskEngine';
 import {
   Camera,
-  Video,
   Play,
   Pause,
   Maximize,
-  RefreshCw,
   AlertTriangle,
-  Shield,
-  CheckCircle2,
-  Upload,
   Volume2,
   VolumeX,
-  Radio,
   Eye,
-  Sliders,
-  Sparkles,
-  ExternalLink,
   PlusCircle,
   X,
-  FileText,
   UserCheck,
 } from 'lucide-react';
 
@@ -41,24 +31,22 @@ export const LiveMonitoringPage = () => {
 
   const videoRef = useRef(null);
   const [stream, setStream] = useState(null);
-  const [cameraStatus, setCameraStatus] = useState('IDLE'); // IDLE, CONNECTING, ACTIVE, ERROR, PAUSED
+  const [cameraStatus, setCameraStatus] = useState('IDLE'); // IDLE, CONNECTING, ACTIVE, ERROR
   const [errorMessage, setErrorMessage] = useState('');
   const [activeScenarioKey, setActiveScenarioKey] = useState('PPE_VIOLATION');
   const [isAnalysisActive, setIsAnalysisActive] = useState(true);
-  const [detectionMode, setDetectionMode] = useState('DEMO_MODE'); // LIVE_AI, DEMO_MODE
-  const [facingMode, setFacingMode] = useState('user');
   const [capturedEvidence, setCapturedEvidence] = useState(null);
   const [showIncidentModal, setShowIncidentModal] = useState(false);
   const [incidentForm, setIncidentForm] = useState({
     hazard: '',
     severity: 'HIGH',
-    assignedTo: 'Site Safety Supervisor',
-    correctiveAction: 'Halt worker entry and equip required PPE.',
+    assignedTo: 'Safety Supervisor',
+    correctiveAction: 'Halt work in active zone and equip required PPE.',
     site: 'Apex Tower — Zone B',
     location: 'Sector 4 Platform',
   });
 
-  const [fps, setFps] = useState(28);
+  const [fps, setFps] = useState(24);
   const [latency, setLatency] = useState(42);
 
   const activeScenario = DEMO_SCENARIOS[activeScenarioKey] || DEMO_SCENARIOS.PPE_VIOLATION;
@@ -72,11 +60,7 @@ export const LiveMonitoringPage = () => {
         stream.getTracks().forEach((track) => track.stop());
       }
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode,
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
+        video: { width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false,
       });
 
@@ -85,19 +69,16 @@ export const LiveMonitoringPage = () => {
         videoRef.current.srcObject = mediaStream;
       }
       setCameraStatus('ACTIVE');
-      setDetectionMode('LIVE_AI');
     } catch (err) {
-      console.warn('Camera access error', err);
       setCameraStatus('ERROR');
       setErrorMessage(
         err.name === 'NotAllowedError'
-          ? 'Camera permission was denied. Please allow camera access in browser settings or use Demo Mode / Upload.'
-          : 'Camera device unavailable or not found. Fallback to Demo Simulation or sample upload below.'
+          ? 'Camera permission denied. Please allow camera access in browser settings.'
+          : 'Camera device unavailable. Using simulation demo mode.'
       );
     }
   };
 
-  // Stop camera
   const stopCamera = () => {
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
@@ -107,31 +88,8 @@ export const LiveMonitoringPage = () => {
       videoRef.current.srcObject = null;
     }
     setCameraStatus('IDLE');
-    setDetectionMode('DEMO_MODE');
   };
 
-  // Switch camera front/back
-  const switchCamera = () => {
-    const nextMode = facingMode === 'user' ? 'environment' : 'user';
-    setFacingMode(nextMode);
-    if (cameraStatus === 'ACTIVE') {
-      setTimeout(() => startCamera(), 100);
-    }
-  };
-
-  // Fullscreen viewport
-  const toggleFullscreen = () => {
-    const el = document.getElementById('inspection-viewport');
-    if (el) {
-      if (!document.fullscreenElement) {
-        el.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
-    }
-  };
-
-  // Trigger scenario
   const handleSelectScenario = (key) => {
     setActiveScenarioKey(key);
     const scenario = DEMO_SCENARIOS[key];
@@ -148,7 +106,6 @@ export const LiveMonitoringPage = () => {
     }
   };
 
-  // Capture snapshot
   const handleCaptureEvidence = () => {
     let img = null;
     if (cameraStatus === 'ACTIVE' && videoRef.current) {
@@ -163,18 +120,17 @@ export const LiveMonitoringPage = () => {
       hazard: activeScenario.title,
       severity: activeScenario.riskLevel,
       confidence: activeScenario.detections[0]?.confidence || 95,
-      camera: cameraStatus === 'ACTIVE' ? 'LIVE-WEBCAM-01' : 'CAM-01 (Apex Tower)',
+      camera: cameraStatus === 'ACTIVE' ? 'Camera 01 (Live Feed)' : 'CAM-01 (Apex Tower)',
       location: 'Sector 4 Scaffolding Platform',
       imageUrl: img,
     });
   };
 
-  // Open Incident Creation Modal
   const handleOpenIncidentModal = () => {
     setIncidentForm({
       hazard: activeAlert?.hazard || activeScenario.title,
       severity: activeAlert?.severity || activeScenario.riskLevel,
-      assignedTo: 'Site Safety Supervisor',
+      assignedTo: 'Safety Supervisor',
       correctiveAction: activeScenario.detections[0]?.recommendedAction || 'Inspect work area and verify PPE.',
       site: 'Apex Tower — Zone B',
       location: 'Sector 4 Platform',
@@ -200,103 +156,69 @@ export const LiveMonitoringPage = () => {
     navigate('/incidents');
   };
 
-  // Simulation telemetry fluctuation
   useEffect(() => {
     const interval = setInterval(() => {
       if (isAnalysisActive) {
-        setFps(27 + Math.floor(Math.random() * 5));
-        setLatency(38 + Math.floor(Math.random() * 12));
+        setFps(24 + (Math.random() > 0.5 ? 1 : 0));
+        setLatency(38 + Math.floor(Math.random() * 8));
       }
-    }, 1500);
+    }, 2000);
     return () => clearInterval(interval);
   }, [isAnalysisActive]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">
-            <Radio className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
-            <span>Computer Vision Surveillance</span>
-            <span
-              className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
-                detectionMode === 'LIVE_AI'
-                  ? 'bg-sky-500/10 text-sky-400 border border-sky-500/30'
-                  : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-              }`}
-            >
-              {detectionMode === 'LIVE_AI' ? 'LIVE AI WEBCAM' : 'DEMO SIMULATION MODE'}
-            </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#243247]">
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-[22px] sm:text-[24px] font-semibold text-[#F1F5F9] tracking-tight">
+              Live Monitoring
+            </h1>
+            <p className="text-[13px] text-[#94A3B8] mt-0.5">
+              Live video surveillance and automated hazard detection.
+            </p>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-            Live Camera Inspection & Hazard Diagnostics
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-            Real-time optical object detection, PPE compliance verification, and instant risk scoring.
-          </p>
         </div>
 
-        {/* Global Action Bar */}
+        {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setIsAudioMuted(soundEngine.toggleMute())}
-            className={`p-2 rounded-lg border text-xs transition ${
-              isAudioMuted
-                ? 'bg-slate-900 border-slate-700 text-slate-400'
-                : 'bg-sky-500/10 border-sky-500/30 text-sky-400'
-            }`}
-            title={isAudioMuted ? 'Unmute alert chimes' : 'Mute alert chimes'}
+            className="vg-btn-secondary py-1.5 px-2.5"
+            title={isAudioMuted ? 'Unmute alerts' : 'Mute alerts'}
           >
-            {isAudioMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            {isAudioMuted ? <VolumeX className="w-4 h-4 text-[#64748B]" /> : <Volume2 className="w-4 h-4 text-[#22C7E8]" />}
           </button>
 
           {cameraStatus !== 'ACTIVE' ? (
-            <button
-              onClick={startCamera}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs transition shadow-sm"
-            >
+            <button onClick={startCamera} className="vg-btn-primary">
               <Camera className="w-4 h-4" />
               <span>Connect Camera</span>
             </button>
           ) : (
             <button
               onClick={stopCamera}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-semibold text-xs transition"
+              className="vg-btn-secondary text-[#EF4444] border-[#EF4444]/30 hover:bg-[#EF4444]/10"
             >
               <Pause className="w-4 h-4" />
               <span>Stop Camera</span>
             </button>
           )}
 
-          <button
-            onClick={handleCaptureEvidence}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 hover:bg-slate-800 text-slate-200 font-semibold text-xs transition"
-          >
-            <Eye className="w-4 h-4 text-sky-400" />
+          <button onClick={handleCaptureEvidence} className="vg-btn-secondary">
+            <Eye className="w-4 h-4" />
             <span>Capture Evidence</span>
           </button>
-
-          <Link
-            to="/inspections/new"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 hover:bg-slate-800 text-slate-200 font-semibold text-xs transition"
-          >
-            <PlusCircle className="w-4 h-4 text-emerald-400" />
-            <span>Start Inspection</span>
-          </Link>
         </div>
       </div>
 
-      {/* Main Grid: Viewport + Risk Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left 8 Cols: Video Viewport & Scenarios */}
-        <div className="lg:col-span-8 space-y-4">
-          {/* Inspection Viewport Container */}
-          <div
-            id="inspection-viewport"
-            className="relative aspect-video rounded-xl bg-slate-950 border border-slate-800 overflow-hidden shadow-2xl flex items-center justify-center group select-none"
-          >
-            {/* Live Video Element */}
+      {/* Main Grid: Viewport + Right Side Risks */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Left 8 Cols: Video Feed */}
+        <div className="lg:col-span-8 space-y-3">
+          <div className="relative aspect-video rounded-lg bg-[#0B1220] border border-[#243247] overflow-hidden flex items-center justify-center">
+            {/* Live Video */}
             <video
               ref={videoRef}
               autoPlay
@@ -305,43 +227,25 @@ export const LiveMonitoringPage = () => {
               className={`w-full h-full object-cover ${cameraStatus === 'ACTIVE' ? 'block' : 'hidden'}`}
             />
 
-            {/* Fallback Simulation Background Image */}
+            {/* Fallback Simulation Feed */}
             {cameraStatus !== 'ACTIVE' && (
               <img
                 src="https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=1200&auto=format&fit=crop"
-                alt="Scaffold Simulation"
-                className="w-full h-full object-cover opacity-80"
+                alt="Monitoring Feed"
+                className="w-full h-full object-cover opacity-85"
               />
             )}
 
-            {/* Viewfinder Crosshairs */}
-            <div className="absolute inset-0 pointer-events-none border border-slate-700/30">
-              <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-sky-400" />
-              <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-sky-400" />
-              <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-sky-400" />
-              <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-sky-400" />
+            {/* Top Bar Overlay */}
+            <div className="absolute top-0 inset-x-0 p-3 bg-gradient-to-b from-[#0B1220]/90 to-transparent flex items-center justify-between text-[12px] font-mono pointer-events-none">
+              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#0F172A] border border-[#243247] text-[#22C7E8] font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                {cameraStatus === 'ACTIVE' ? 'LIVE CAMERA' : 'CAMERA 01 (SIMULATION)'}
+              </span>
+              <span className="text-[#94A3B8]">1080p · {fps} FPS · {latency}ms</span>
             </div>
 
-            {/* Top Telemetry HUD */}
-            <div className="absolute top-0 inset-x-0 p-3 bg-gradient-to-b from-slate-950/90 via-slate-950/60 to-transparent flex items-center justify-between font-mono text-[11px] text-slate-200 pointer-events-none">
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40 font-bold animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-                  {cameraStatus === 'ACTIVE' ? 'LIVE CAMERA' : 'SIMULATION'}
-                </span>
-                <span className="font-bold text-white tracking-wide">
-                  {cameraStatus === 'ACTIVE' ? 'USB / INTEGRATED OPTICS' : 'CAM-01 (Apex Tower Zone B)'}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-3 text-slate-400">
-                <span>1280 × 720</span>
-                <span>{fps} FPS</span>
-                <span className="text-sky-400 font-bold">{latency}ms</span>
-              </div>
-            </div>
-
-            {/* Dynamic Bounding Boxes Overlay */}
+            {/* Bounding Boxes */}
             {isAnalysisActive &&
               activeScenario.detections.map((det) => {
                 const isCritical = det.severity === 'CRITICAL';
@@ -351,14 +255,14 @@ export const LiveMonitoringPage = () => {
                 return (
                   <div
                     key={det.id}
-                    className={`absolute pointer-events-none rounded transition-all duration-300 border-2 ${
+                    className={`absolute pointer-events-none border-2 rounded ${
                       isCritical
-                        ? 'border-rose-500 bg-rose-500/10'
+                        ? 'border-[#EF4444] bg-[#EF4444]/10'
                         : isHigh
-                        ? 'border-amber-500 bg-amber-500/10'
+                        ? 'border-[#F59E0B] bg-[#F59E0B]/10'
                         : isSafe
-                        ? 'border-emerald-500 bg-emerald-500/10'
-                        : 'border-cyan-500 bg-cyan-500/10'
+                        ? 'border-[#22C55E] bg-[#22C55E]/10'
+                        : 'border-[#22C7E8] bg-[#22C7E8]/10'
                     }`}
                     style={{
                       top: `${det.box.top}%`,
@@ -367,93 +271,40 @@ export const LiveMonitoringPage = () => {
                       height: `${det.box.height}%`,
                     }}
                   >
-                    {/* Bounding Box Label Badge */}
                     <div
-                      className={`absolute -top-6 left-0 px-2 py-0.5 font-mono text-[10px] font-bold rounded flex items-center gap-1.5 shadow ${
+                      className={`absolute -top-5 left-0 px-1.5 py-0.5 font-mono text-[10px] font-semibold rounded ${
                         isCritical
-                          ? 'bg-rose-600 text-white'
+                          ? 'bg-[#EF4444] text-white'
                           : isHigh
-                          ? 'bg-amber-600 text-slate-950'
+                          ? 'bg-[#F59E0B] text-[#0B1220]'
                           : isSafe
-                          ? 'bg-emerald-600 text-white'
-                          : 'bg-cyan-600 text-slate-950'
+                          ? 'bg-[#22C55E] text-white'
+                          : 'bg-[#22C7E8] text-[#0B1220]'
                       }`}
                     >
-                      <span>{det.label}</span>
-                      <span>[{det.confidence}%]</span>
+                      {det.label} · {det.confidence}%
                     </div>
                   </div>
                 );
               })}
 
-            {/* Camera Error / Denied Fallback Banner */}
-            {cameraStatus === 'ERROR' && (
-              <div className="absolute inset-0 bg-slate-950/85 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3">
-                <AlertTriangle className="w-12 h-12 text-amber-400" />
-                <h3 className="text-base font-bold text-white">Camera Unavailable</h3>
-                <p className="text-xs text-slate-400 max-w-md">{errorMessage}</p>
-                <div className="flex items-center gap-3 pt-2">
-                  <button
-                    onClick={startCamera}
-                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition"
-                  >
-                    Retry Permission
-                  </button>
-                  <button
-                    onClick={() => {
-                      setCameraStatus('IDLE');
-                      setDetectionMode('DEMO_MODE');
-                    }}
-                    className="px-3.5 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-xs font-semibold text-slate-950 transition"
-                  >
-                    Switch to Demo Mode
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Bottom Stream Telemetry Bar */}
-            <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-slate-950/90 via-slate-950/70 to-transparent flex items-center justify-between text-xs font-mono">
-              <div className="flex items-center gap-2 text-slate-300">
-                <span className="text-slate-400">ANALYSIS:</span>
-                <span className={isAnalysisActive ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-semibold'}>
-                  {isAnalysisActive ? 'ACTIVE' : 'PAUSED'}
-                </span>
-                <span className="text-slate-600">|</span>
-                <span className="text-slate-400">SCENARIO:</span>
-                <span className="text-sky-400 font-bold">{activeScenario.title}</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsAnalysisActive(!isAnalysisActive)}
-                  className="px-2.5 py-1 rounded bg-slate-900/90 border border-slate-700 hover:border-sky-400 text-slate-200 text-[11px] transition"
-                >
-                  {isAnalysisActive ? 'Pause Inference' : 'Resume Inference'}
-                </button>
-                <button
-                  onClick={toggleFullscreen}
-                  className="p-1 rounded bg-slate-900/90 border border-slate-700 hover:border-sky-400 text-slate-200 text-[11px] transition"
-                  title="Fullscreen"
-                >
-                  <Maximize className="w-3.5 h-3.5" />
-                </button>
-              </div>
+            {/* Bottom Status Bar */}
+            <div className="absolute bottom-0 inset-x-0 p-2.5 bg-[#0F172A]/90 border-t border-[#243247] flex items-center justify-between text-[12px] font-mono text-[#94A3B8]">
+              <span>Camera 01 | 1080p | {fps} FPS | AI Analysis {isAnalysisActive ? 'ON' : 'PAUSED'}</span>
+              <button
+                onClick={() => setIsAnalysisActive(!isAnalysisActive)}
+                className="text-[#22C7E8] hover:underline"
+              >
+                {isAnalysisActive ? 'Pause' : 'Resume'}
+              </button>
             </div>
           </div>
 
-          {/* Hackathon Deterministic Demo Scenarios Bar */}
-          <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-sky-400" />
-                <h3 className="text-xs font-bold text-slate-200 uppercase font-mono tracking-wider">
-                  Hackathon Demo Scenarios (Deterministic CV Simulation)
-                </h3>
-              </div>
-              <span className="text-[10px] font-mono text-slate-400">6 Scenarios</span>
-            </div>
-
+          {/* Scenario Selector Toolbar */}
+          <div className="vg-card p-3 space-y-2">
+            <span className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider block">
+              Demo Test Scenarios
+            </span>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
               {Object.keys(DEMO_SCENARIOS).map((key) => {
                 const scen = DEMO_SCENARIOS[key];
@@ -462,29 +313,14 @@ export const LiveMonitoringPage = () => {
                   <button
                     key={key}
                     onClick={() => handleSelectScenario(key)}
-                    className={`p-2 rounded-lg border text-left text-xs transition flex flex-col justify-between ${
+                    className={`py-1.5 px-2 rounded text-[12px] text-left transition ${
                       isSelected
-                        ? 'bg-slate-800 border-sky-400 ring-1 ring-sky-400/40 text-white font-semibold'
-                        : 'bg-slate-950 border-slate-850 text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                        ? 'bg-[#1E293B] border border-[#22C7E8] text-[#F1F5F9] font-medium'
+                        : 'bg-[#0B1220] border border-[#243247] text-[#94A3B8] hover:text-[#F1F5F9]'
                     }`}
                   >
-                    <span className="text-[10px] font-mono truncate mb-1">
-                      {scen.category}
-                    </span>
-                    <span className="text-[11px] font-medium leading-tight truncate">
-                      {scen.title.split(' ')[0]} {scen.title.split(' ')[1]}
-                    </span>
-                    <span
-                      className={`text-[9px] font-mono font-bold mt-1.5 ${
-                        scen.riskLevel === 'CRITICAL'
-                          ? 'text-rose-400'
-                          : scen.riskLevel === 'HIGH'
-                          ? 'text-amber-400'
-                          : 'text-emerald-400'
-                      }`}
-                    >
-                      {scen.riskLevel}
-                    </span>
+                    <span className="block font-medium truncate">{scen.title.split(' ')[0]} {scen.title.split(' ')[1]}</span>
+                    <span className="text-[10px] text-[#64748B] block font-mono">{scen.riskLevel}</span>
                   </button>
                 );
               })}
@@ -492,229 +328,95 @@ export const LiveMonitoringPage = () => {
           </div>
         </div>
 
-        {/* Right 4 Cols: Live Risk Monitor & Active Detections */}
-        <div className="lg:col-span-4 space-y-4">
-          {/* Overall Risk Score HUD */}
-          <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono uppercase tracking-wider text-slate-400">Live Risk Monitor</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-300">
-                ACTIVE
+        {/* Right 4 Cols: Active Risks & Controls */}
+        <div className="lg:col-span-4 space-y-3">
+          {/* Active Risks Panel */}
+          <div className="vg-card p-4 space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-[#243247]">
+              <h2 className="text-[14px] font-semibold text-[#F1F5F9]">Active Hazards</h2>
+              <span className="text-[11px] font-mono text-[#94A3B8]">
+                Risk Score: <strong className="text-[#F1F5F9]">{activeScenario.riskScore}/100</strong>
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-950 border border-slate-850">
-              <div>
-                <span className="text-[10px] uppercase font-mono text-slate-400 block">Overall Risk Score</span>
-                <span
-                  className={`text-2xl font-bold font-mono ${
-                    activeScenario.riskScore > 80
-                      ? 'text-rose-400'
-                      : activeScenario.riskScore > 50
-                      ? 'text-amber-400'
-                      : 'text-emerald-400'
-                  }`}
-                >
-                  {activeScenario.riskScore} <span className="text-xs text-slate-400 font-sans">/ 100</span>
-                </span>
-              </div>
-
-              <span
-                className={`px-2.5 py-1 rounded text-xs font-mono font-bold ${
-                  activeScenario.riskLevel === 'CRITICAL'
-                    ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
-                    : activeScenario.riskLevel === 'HIGH'
-                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                    : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                }`}
-              >
-                {activeScenario.riskLevel}
-              </span>
-            </div>
-
-            {/* Active Detections List */}
             <div className="space-y-2">
-              <span className="text-[11px] font-mono uppercase text-slate-400 block">Active Optical Detections</span>
               {activeScenario.detections.map((det) => (
-                <div
-                  key={det.id}
-                  className="p-2.5 rounded-lg bg-slate-950 border border-slate-850 space-y-1 text-xs"
-                >
+                <div key={det.id} className="p-2.5 rounded bg-[#0B1220] border border-[#243247] text-[12px] space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-200">{det.label}</span>
-                    <span className="font-mono text-sky-400 font-bold text-[11px]">{det.confidence}%</span>
+                    <span className="font-semibold text-[#F1F5F9]">{det.label}</span>
+                    <span className="text-[#22C7E8] font-mono font-medium">{det.confidence}%</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">{det.evidence}</p>
-                  <div className="text-[10px] font-mono text-slate-400 pt-1 border-t border-slate-900 flex justify-between">
-                    <span>{det.complianceRef}</span>
-                    <span
-                      className={
-                        det.severity === 'CRITICAL'
-                          ? 'text-rose-400 font-bold'
-                          : det.severity === 'HIGH'
-                          ? 'text-amber-400 font-bold'
-                          : 'text-emerald-400 font-bold'
-                      }
-                    >
-                      {det.severity}
-                    </span>
-                  </div>
+                  <p className="text-[11px] text-[#94A3B8] leading-normal">{det.evidence}</p>
                 </div>
               ))}
             </div>
 
-            {/* Action Buttons */}
-            <div className="pt-2 flex items-center gap-2">
+            <div className="pt-2">
               <button
                 onClick={handleOpenIncidentModal}
-                className="w-full py-2 px-3 rounded-lg bg-rose-500 hover:bg-rose-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow"
+                className="w-full vg-btn-primary justify-center py-2"
               >
-                <AlertTriangle className="w-4 h-4" />
-                <span>Create Incident Record</span>
+                <AlertTriangle className="w-3.5 h-3.5" />
+                <span>Create Incident</span>
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Real-time Alert Modal Popup */}
-      {activeAlert && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-2xl bg-slate-900 border border-rose-500/50 shadow-2xl p-6 space-y-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 animate-pulse">
-                  <AlertTriangle className="w-6 h-6" />
-                </div>
-                <div>
-                  <span className="text-[10px] font-mono text-rose-400 font-bold tracking-wider uppercase block">
-                    CRITICAL SAFETY ALERT
-                  </span>
-                  <h3 className="text-base font-bold text-white">{activeAlert.hazard}</h3>
-                </div>
-              </div>
-
-              <button
-                onClick={dismissActiveAlert}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-300 leading-relaxed bg-slate-950 p-3 rounded-xl border border-slate-800">
-              {activeAlert.description}
-            </p>
-
-            <div className="flex items-center justify-between text-xs font-mono text-slate-400 p-2 rounded-lg bg-slate-950 border border-slate-850">
-              <span>RISK SCORE: <strong className="text-rose-400">{activeAlert.riskScore || 92}/100</strong></span>
-              <span>LOCATION: <strong className="text-slate-200">{activeAlert.location || 'Sector 4'}</strong></span>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                onClick={dismissActiveAlert}
-                className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
-              >
-                Acknowledge
-              </button>
-              <button
-                onClick={handleOpenIncidentModal}
-                className="px-4 py-2 rounded-lg bg-rose-500 hover:bg-rose-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5"
-              >
-                <UserCheck className="w-4 h-4" />
-                <span>Create Incident & Assign</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Incident Creation Modal */}
+      {/* Incident Modal */}
       {showIncidentModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-white">Create Safety Incident</h3>
-              <button
-                onClick={() => setShowIncidentModal(false)}
-                className="p-1 rounded text-slate-400 hover:text-white"
-              >
+        <div className="fixed inset-0 bg-[#0B1220]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md vg-card p-5 space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-[#243247]">
+              <h3 className="text-[15px] font-semibold text-[#F1F5F9]">Create Incident Record</h3>
+              <button onClick={() => setShowIncidentModal(false)} className="text-[#64748B] hover:text-[#F1F5F9]">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveIncident} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveIncident} className="space-y-3 text-[13px]">
               <div>
-                <label className="block text-slate-400 font-mono mb-1">Hazard Title</label>
+                <label className="block text-[#94A3B8] mb-1">Hazard Title</label>
                 <input
                   type="text"
                   value={incidentForm.hazard}
                   onChange={(e) => setIncidentForm({ ...incidentForm, hazard: e.target.value })}
+                  className="w-full py-1.5 px-2.5 bg-[#0B1220] border border-[#243247] rounded text-[#F1F5F9]"
                   required
-                  className="w-full py-2 px-3 bg-slate-950 border border-slate-800 rounded-lg text-slate-200"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-slate-400 font-mono mb-1">Severity</label>
-                  <select
-                    value={incidentForm.severity}
-                    onChange={(e) => setIncidentForm({ ...incidentForm, severity: e.target.value })}
-                    className="w-full py-2 px-3 bg-slate-950 border border-slate-800 rounded-lg text-slate-200"
-                  >
-                    <option value="CRITICAL">CRITICAL</option>
-                    <option value="HIGH">HIGH</option>
-                    <option value="MEDIUM">MEDIUM</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-slate-400 font-mono mb-1">Site / Zone</label>
-                  <input
-                    type="text"
-                    value={incidentForm.site}
-                    onChange={(e) => setIncidentForm({ ...incidentForm, site: e.target.value })}
-                    className="w-full py-2 px-3 bg-slate-950 border border-slate-800 rounded-lg text-slate-200"
-                  >
-                  </input>
-                </div>
-              </div>
-
               <div>
-                <label className="block text-slate-400 font-mono mb-1">Assigned Personnel</label>
+                <label className="block text-[#94A3B8] mb-1">Assigned Person</label>
                 <input
                   type="text"
                   value={incidentForm.assignedTo}
                   onChange={(e) => setIncidentForm({ ...incidentForm, assignedTo: e.target.value })}
-                  className="w-full py-2 px-3 bg-slate-950 border border-slate-800 rounded-lg text-slate-200"
+                  className="w-full py-1.5 px-2.5 bg-[#0B1220] border border-[#243247] rounded text-[#F1F5F9]"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 font-mono mb-1">Mandated Corrective Action</label>
+                <label className="block text-[#94A3B8] mb-1">Corrective Action</label>
                 <textarea
                   rows={2}
                   value={incidentForm.correctiveAction}
                   onChange={(e) => setIncidentForm({ ...incidentForm, correctiveAction: e.target.value })}
-                  className="w-full py-2 px-3 bg-slate-950 border border-slate-800 rounded-lg text-slate-200"
+                  className="w-full py-1.5 px-2.5 bg-[#0B1220] border border-[#243247] rounded text-[#F1F5F9]"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 border-t border-[#243247]">
                 <button
                   type="button"
                   onClick={() => setShowIncidentModal(false)}
-                  className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300"
+                  className="vg-btn-ghost"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold"
-                >
-                  Save & Assign Incident
+                <button type="submit" className="vg-btn-primary">
+                  Save Incident
                 </button>
               </div>
             </form>

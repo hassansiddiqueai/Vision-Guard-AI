@@ -4,14 +4,7 @@ import {
   FileText,
   Printer,
   Download,
-  CheckCircle2,
-  AlertTriangle,
   Shield,
-  MapPin,
-  Calendar,
-  User,
-  Scan,
-  Share2,
   Building,
 } from 'lucide-react';
 
@@ -30,7 +23,6 @@ export const ReportsPage = () => {
     setIsGenerating(true);
     setTimeout(() => {
       setIsGenerating(false);
-      // Generate JSON/Text report export
       const reportData = JSON.stringify(currentInspection, null, 2);
       const blob = new Blob([reportData], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -39,12 +31,12 @@ export const ReportsPage = () => {
       a.download = `VisionGuard_Report_${currentInspection?.id || 'AUDIT'}.json`;
       a.click();
       URL.revokeObjectURL(url);
-    }, 600);
+    }, 400);
   };
 
   if (!currentInspection) {
     return (
-      <div className="py-20 text-center text-slate-400 font-mono text-xs">
+      <div className="py-20 text-center text-[#94A3B8] text-[13px]">
         No inspection records available to generate reports.
       </div>
     );
@@ -54,60 +46,45 @@ export const ReportsPage = () => {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header & Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800 print:hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#243247] print:hidden">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">
-            <FileText className="w-3.5 h-3.5 text-sky-400" />
-            <span>Audit Documentation</span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-            Inspection & Compliance Reports
+          <h1 className="text-[22px] sm:text-[24px] font-semibold text-[#F1F5F9] tracking-tight">
+            Inspection Reports
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-            Generate, preview, print, and export regulatory-grade inspection audit summaries.
+          <p className="text-[13px] text-[#94A3B8] mt-0.5">
+            Generate and export regulatory-grade inspection audit reports.
           </p>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={handlePrint}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 hover:bg-slate-800 text-slate-200 text-xs font-semibold transition"
-          >
-            <Printer className="w-4 h-4 text-sky-400" />
-            <span>Print Audit Sheet</span>
+          <button onClick={handlePrint} className="vg-btn-secondary">
+            <Printer className="w-3.5 h-3.5 text-[#22C7E8]" />
+            <span>Print Report</span>
           </button>
 
-          <button
-            onClick={handleDownload}
-            disabled={isGenerating}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-semibold transition shadow-sm"
-          >
-            <Download className="w-4 h-4" />
-            <span>{isGenerating ? 'Exporting...' : 'Download JSON Data'}</span>
+          <button onClick={handleDownload} disabled={isGenerating} className="vg-btn-primary">
+            <Download className="w-3.5 h-3.5" />
+            <span>{isGenerating ? 'Exporting...' : 'Download Data'}</span>
           </button>
         </div>
       </div>
 
-      {/* Select Inspection Toolbar */}
-      <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs print:hidden">
-        <label htmlFor="audit-select" className="font-medium text-slate-300 flex items-center gap-2">
-          <Building className="w-4 h-4 text-sky-400" />
-          <span>Select Target Inspection:</span>
+      {/* Select Inspection Bar */}
+      <div className="vg-card p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[13px] print:hidden">
+        <label htmlFor="audit-select" className="font-medium text-[#F1F5F9] flex items-center gap-2">
+          <Building className="w-4 h-4 text-[#22C7E8]" />
+          <span>Select Inspection:</span>
         </label>
         <select
           id="audit-select"
-          aria-label="Select Target Inspection"
           value={selectedId}
           onChange={(e) => setSelectedId(e.target.value)}
-          className="w-full sm:w-auto min-w-[340px] py-2 px-3 bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-lg text-slate-200 font-mono text-xs"
+          className="w-full sm:w-auto min-w-[320px] py-1.5 px-2.5 bg-[#0B1220] border border-[#243247] rounded text-[#F1F5F9] text-[13px]"
         >
           {inspections.map((insp) => (
             <option key={insp.id} value={insp.id}>
@@ -117,150 +94,98 @@ export const ReportsPage = () => {
         </select>
       </div>
 
-      {/* Printable Report Document Container */}
-      <div className="p-6 sm:p-8 rounded-xl bg-slate-950 border border-slate-800 space-y-6 shadow-2xl print:border-none print:shadow-none print:p-0">
-        {/* Report Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400">
-              <Shield className="w-5 h-5" />
+      {/* Printable Report Container */}
+      <div className="vg-card p-6 sm:p-8 space-y-5 print:border-none print:p-0">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#243247]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded bg-[#22C7E8]/10 border border-[#22C7E8]/30 flex items-center justify-center text-[#22C7E8]">
+              <Shield className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-bold text-base tracking-wide text-white flex items-center gap-1">
-                VISION<span className="text-sky-400">GUARD</span> AI
+              <span className="font-semibold text-[15px] text-[#F1F5F9]">
+                VISION<span className="text-[#22C7E8]">GUARD</span>
               </span>
-              <p className="text-[10px] text-slate-400 font-mono">INDUSTRIAL SAFETY INTELLIGENCE REPORT</p>
+              <p className="text-[11px] text-[#94A3B8]">SAFETY INSPECTION AUDIT REPORT</p>
             </div>
           </div>
 
-          <div className="text-left sm:text-right font-mono text-xs text-slate-400 space-y-0.5">
-            <div>
-              REPORT REF: <span className="text-sky-400 font-bold">{currentInspection.id}</span>
-            </div>
-            <div>GENERATED: {dateFormatted}</div>
+          <div className="text-left sm:text-right text-[12px] text-[#94A3B8] space-y-0.5">
+            <div>REPORT ID: <strong className="text-[#F1F5F9] font-mono">{currentInspection.id}</strong></div>
+            <div>DATE: {dateFormatted}</div>
           </div>
         </div>
 
         {/* Metadata Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-lg bg-slate-900/60 border border-slate-850 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded bg-[#0B1220] border border-[#243247] text-[12px]">
           <div>
-            <span className="text-[10px] uppercase font-mono text-slate-400 block">Site / Facility</span>
-            <span className="font-semibold text-slate-200">{currentInspection.site}</span>
+            <span className="text-[#64748B] text-[11px] block">SITE</span>
+            <span className="font-medium text-[#F1F5F9]">{currentInspection.site}</span>
           </div>
           <div>
-            <span className="text-[10px] uppercase font-mono text-slate-400 block">Inspection Scope</span>
-            <span className="font-semibold text-slate-200">{currentInspection.type}</span>
+            <span className="text-[#64748B] text-[11px] block">TYPE</span>
+            <span className="font-medium text-[#F1F5F9]">{currentInspection.type}</span>
           </div>
           <div>
-            <span className="text-[10px] uppercase font-mono text-slate-400 block">Lead Auditor</span>
-            <span className="font-semibold text-slate-200">{currentInspection.inspector}</span>
+            <span className="text-[#64748B] text-[11px] block">INSPECTOR</span>
+            <span className="font-medium text-[#F1F5F9]">{currentInspection.inspector}</span>
           </div>
           <div>
-            <span className="text-[10px] uppercase font-mono text-slate-400 block">Overall Risk Rating</span>
-            <span
-              className={`font-mono font-bold ${
-                currentInspection.riskLevel === 'CRITICAL'
-                  ? 'text-rose-400'
-                  : currentInspection.riskLevel === 'HIGH'
-                  ? 'text-amber-400'
-                  : 'text-emerald-400'
-              }`}
-            >
-              {currentInspection.riskLevel} ({currentInspection.overallConfidence || 95}%)
-            </span>
+            <span className="text-[#64748B] text-[11px] block">RISK LEVEL</span>
+            <span className="font-medium text-[#EF4444]">{currentInspection.riskLevel}</span>
           </div>
         </div>
 
         {/* Executive Summary */}
-        <div className="space-y-2">
-          <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-slate-300">
+        <div className="space-y-1.5">
+          <h2 className="text-[13px] font-semibold text-[#F1F5F9] uppercase tracking-wider font-mono">
             1. Executive Summary
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed bg-slate-900/40 p-4 rounded-lg border border-slate-850">
-            {currentInspection.summary ||
-              'Comprehensive computer-vision audit executed across site imagery. All anomalous geometric patterns, protective barrier voids, and structural couplings were evaluated against safety benchmarks.'}
+          </h2>
+          <p className="text-[13px] text-[#94A3B8] leading-relaxed p-3 rounded bg-[#0B1220] border border-[#243247]">
+            {currentInspection.summary}
           </p>
         </div>
 
-        {/* Evidence & Defect Image */}
+        {/* Evidence Image */}
         {currentInspection.imageUrl && (
-          <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-slate-300">
+          <div className="space-y-1.5">
+            <h2 className="text-[13px] font-semibold text-[#F1F5F9] uppercase tracking-wider font-mono">
               2. Visual Evidence Target
-            </h3>
-            <div className="rounded-lg overflow-hidden border border-slate-800 max-h-80 bg-slate-900">
+            </h2>
+            <div className="rounded overflow-hidden border border-[#243247] bg-[#0B1220] max-h-72">
               <img
                 src={currentInspection.imageUrl}
-                alt="Audit target"
-                className="w-full h-80 object-cover"
+                alt="Inspection target"
+                className="w-full h-72 object-cover"
               />
             </div>
           </div>
         )}
 
-        {/* Detailed Findings Table */}
-        <div className="space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-slate-300">
-            3. Hazard Detections & Corrective Actions
-          </h3>
+        {/* Findings */}
+        <div className="space-y-2">
+          <h2 className="text-[13px] font-semibold text-[#F1F5F9] uppercase tracking-wider font-mono">
+            3. Findings & Corrective Actions
+          </h2>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {(currentInspection.findings || []).map((f, idx) => (
-              <div
-                key={f.id || idx}
-                className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2 text-xs"
-              >
+              <div key={f.id || idx} className="p-3 rounded bg-[#0B1220] border border-[#243247] space-y-1.5 text-[12px]">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-sky-400">#{idx + 1}</span>
-                    <span className="font-bold text-slate-200">{f.label}</span>
-                  </div>
-                  <span
-                    className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded ${
-                      f.severity === 'CRITICAL'
-                        ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                        : f.severity === 'HIGH'
-                        ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                        : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    }`}
-                  >
-                    {f.severity} • {f.confidence}%
+                  <span className="font-semibold text-[#F1F5F9]">
+                    #{idx + 1} {f.label}
                   </span>
+                  <span className="text-[#EF4444] font-medium font-mono">{f.severity} · {f.confidence}%</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-300 pt-1">
-                  <div>
-                    <span className="text-[10px] font-mono text-slate-400 block">Visual Evidence:</span>
-                    <p className="text-[11px]">{f.evidence || 'Visual defect detected.'}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-mono text-slate-400 block">Compliance Standard:</span>
-                    <p className="text-[11px] font-mono text-sky-400">{f.complianceRef || 'Applicable safety baseline'}</p>
-                  </div>
-                </div>
+                <p className="text-[#94A3B8]">{f.evidence}</p>
 
-                <div className="p-2.5 rounded bg-slate-950 border border-slate-850 mt-2">
-                  <span className="text-[10px] font-mono text-slate-400 block uppercase">
-                    Mandated Corrective Remediation:
-                  </span>
-                  <p className="text-slate-200 text-xs font-medium mt-0.5">
-                    {f.correctiveAction || 'Halt operations in area and remediate.'}
-                  </p>
+                <div className="p-2 rounded bg-[#111C2E] border border-[#243247] mt-1">
+                  <span className="text-[#64748B] text-[11px] block">CORRECTIVE ACTION:</span>
+                  <p className="text-[#F1F5F9] font-medium mt-0.5">{f.correctiveAction}</p>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* Audit Signoff Footer */}
-        <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row justify-between gap-4 text-xs font-mono text-slate-400">
-          <div>
-            <span>SYSTEM SIGNATURE: </span>
-            <span className="text-slate-200">VISIONGUARD-V2-ENGINE-VERIFIED</span>
-          </div>
-          <div>
-            <span>AUDITOR SIGN-OFF: </span>
-            <span className="text-slate-200">{currentInspection.inspector}</span>
           </div>
         </div>
       </div>

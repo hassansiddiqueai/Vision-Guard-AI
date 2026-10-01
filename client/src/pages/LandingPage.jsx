@@ -3,150 +3,126 @@ import { Link } from 'react-router-dom';
 import { Navbar } from '../components/layout/Navbar';
 import { Footer } from '../components/layout/Footer';
 import {
-  Shield,
-  ArrowRight,
-  HardHat,
   Building2,
+  HardHat,
   Wrench,
   Factory,
-  Eye,
-  CheckCircle2,
-  AlertTriangle,
-  FileText,
-  Sliders,
+  ArrowRight,
   Play,
+  CheckCircle2,
+  Shield,
 } from 'lucide-react';
 
 export const LandingPage = () => {
   const domains = [
     {
       title: 'Construction & Scaffolding',
-      desc: 'Detect missing diagonal pins, unbraced formwork, loose planking, and trench collapse risks.',
+      desc: 'Detect missing diagonal pins, unbraced formwork, and loose planking.',
       icon: Building2,
       risk: 'CRITICAL',
     },
     {
       title: 'PPE & Fall Protection',
-      desc: 'Verify 100% harness tie-off, hard hat adherence, safety glasses, and high-visibility vest compliance.',
+      desc: 'Verify harness tie-offs, hard hat adherence, and high-visibility vest compliance.',
       icon: HardHat,
       risk: 'HIGH',
     },
     {
       title: 'Heavy Equipment & Machinery',
-      desc: 'Identify unshielded pinch-points, hydraulic seal weeping, missing safety interlocks, and mechanical fatigue.',
+      desc: 'Identify unshielded pinch-points, hydraulic seal weeping, and pedestrian proximity.',
       icon: Wrench,
       risk: 'HIGH',
     },
     {
       title: 'Industrial Facilities & Egress',
-      desc: 'Audit 36-inch electrical panel clearances, obstructed eyewash stations, and fire exit pathways.',
+      desc: 'Audit 36-inch electrical panel clearances and emergency egress pathways.',
       icon: Factory,
       risk: 'MEDIUM',
     },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-sky-500/30 selection:text-sky-200">
+    <div className="min-h-screen bg-[#0B1220] text-[#F1F5F9] flex flex-col">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-12 pb-16 lg:pt-16 lg:pb-24 border-b border-slate-800 bg-industrial-grid">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Left Hero Content */}
-            <div className="lg:col-span-6 space-y-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-slate-900 border border-slate-700 text-sky-400 text-xs font-mono">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span>ENTERPRISE COMPUTER VISION PLATFORM</span>
+      <section className="pt-10 pb-16 lg:pt-14 lg:pb-20 border-b border-[#243247]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-6 space-y-4">
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[#111C2E] border border-[#243247] text-[#22C7E8] text-[12px] font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                <span>Industrial Computer Vision Platform</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+              <h1 className="text-3xl sm:text-4xl font-semibold text-[#F1F5F9] tracking-tight leading-tight">
                 AI-Powered Visual Inspection for High-Risk Environments
               </h1>
 
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-xl">
+              <p className="text-[14px] sm:text-[15px] text-[#94A3B8] leading-relaxed max-w-lg">
                 Analyze site imagery, detect visual hazards, explain findings, and generate actionable inspection reports in seconds.
               </p>
 
-              {/* CTAs */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <Link
-                  to="/inspections/new"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs sm:text-sm transition shadow-sm"
-                >
+              <div className="flex items-center gap-3 pt-2">
+                <Link to="/inspections/new" className="vg-btn-primary py-2 px-4 text-[13px]">
                   <span>Start Inspection</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
 
-                <Link
-                  to="/dashboard"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-xs sm:text-sm transition"
-                >
-                  <Play className="w-3.5 h-3.5 text-sky-400" />
-                  <span>View Demo Dashboard</span>
+                <Link to="/dashboard" className="vg-btn-secondary py-2 px-4 text-[13px]">
+                  <span>View Demo</span>
                 </Link>
               </div>
 
-              {/* Core Industry Specs */}
-              <div className="pt-4 grid grid-cols-3 gap-4 border-t border-slate-800/80 text-xs font-mono">
+              <div className="pt-4 grid grid-cols-3 gap-4 border-t border-[#243247] text-[12px]">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">BENCHMARKS</span>
-                  <span className="text-slate-200 font-semibold">OSHA / ISO Mapped</span>
+                  <span className="text-[#64748B] block text-[11px]">STANDARDS</span>
+                  <span className="text-[#F1F5F9] font-medium">OSHA / ISO Mapped</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">INFERENCE</span>
-                  <span className="text-slate-200 font-semibold">&lt; 1.2s Latency</span>
+                  <span className="text-[#64748B] block text-[11px]">INFERENCE</span>
+                  <span className="text-[#F1F5F9] font-medium">&lt; 1.2s Latency</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">ACCURACY</span>
-                  <span className="text-emerald-400 font-semibold">98.4% Recall</span>
+                  <span className="text-[#64748B] block text-[11px]">AUDIT OUTPUT</span>
+                  <span className="text-[#F1F5F9] font-medium">Print-Ready Reports</span>
                 </div>
               </div>
             </div>
 
-            {/* Right: Realistic Inspection Preview Card */}
+            {/* Right Inspection Preview */}
             <div className="lg:col-span-6">
-              <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
-                {/* HUD Header */}
-                <div className="h-10 bg-slate-950 px-4 flex items-center justify-between border-b border-slate-800 text-xs font-mono">
-                  <span className="text-slate-300 font-medium">LIVE AUDIT // APEX TOWER — TIER 6</span>
-                  <span className="text-rose-400 font-bold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                    RISK: CRITICAL
-                  </span>
+              <div className="vg-card p-3 space-y-2">
+                <div className="flex items-center justify-between text-[11px] font-mono text-[#94A3B8] px-1">
+                  <span>SAMPLE AUDIT · INS-0241</span>
+                  <span className="text-[#EF4444] font-semibold">CRITICAL HAZARD</span>
                 </div>
 
-                {/* Simulated Visual Inspection Canvas */}
-                <div className="relative h-64 sm:h-72 bg-slate-950 flex items-center justify-center overflow-hidden">
+                <div className="relative rounded overflow-hidden border border-[#243247] bg-[#0B1220]">
                   <img
                     src="https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=1000&auto=format&fit=crop"
-                    alt="Inspection target"
-                    className="w-full h-full object-cover opacity-80"
+                    alt="Inspection Preview"
+                    className="w-full h-64 object-cover"
                   />
 
-                  {/* Bounding Box 1: Critical Missing Pin */}
-                  <div className="absolute top-12 right-16 w-36 h-24 border-2 border-rose-500 bg-rose-500/15 rounded">
-                    <div className="absolute -top-5 left-0 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500 text-slate-950">
-                      MISSING LOCK PIN [98.4%]
-                    </div>
-                  </div>
-
-                  {/* Bounding Box 2: Worker PPE Verified */}
-                  <div className="absolute bottom-6 left-12 w-28 h-28 border-2 border-emerald-400 bg-emerald-500/10 rounded">
-                    <div className="absolute -top-5 left-0 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500 text-slate-950">
-                      HARD HAT OK [99.1%]
+                  {/* Clean Bounding Box */}
+                  <div
+                    className="absolute border-2 border-[#EF4444] bg-[#EF4444]/10 rounded pointer-events-none"
+                    style={{ top: '25%', left: '35%', width: '38%', height: '48%' }}
+                  >
+                    <div className="absolute -top-5 left-0 px-1.5 py-0.2 bg-[#EF4444] text-white font-mono text-[10px] font-semibold rounded">
+                      MISSING GUARD PIN · 98.4%
                     </div>
                   </div>
                 </div>
 
-                {/* Finding Action Strip */}
-                <div className="p-4 bg-slate-900/90 border-t border-slate-800 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-white">Immediate Corrective Action:</span>
-                    <span className="text-rose-400 font-mono text-[11px]">PRIORITY 1</span>
-                  </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Stop scaffold elevation work and inspect diagonal coupling pin before allowing worker ascent.
+                <div className="p-2.5 rounded bg-[#0B1220] border border-[#243247] text-[12px] space-y-1">
+                  <span className="text-[#F1F5F9] font-medium block">
+                    Critical coupling anomaly detected on scaffold tier 6.
+                  </span>
+                  <p className="text-[11px] text-[#94A3B8]">
+                    Stop elevation work and inspect coupling before workers access elevated platform.
                   </p>
                 </div>
               </div>
@@ -155,74 +131,36 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* Industrial Domains */}
-      <section className="py-16 bg-slate-950 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl mb-10">
-            <span className="text-xs font-mono text-sky-400 uppercase tracking-wider">Industrial Scope</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mt-1">
-              Purpose-Built for Safety Inspection Workflows
-            </h2>
-            <p className="text-slate-400 text-xs sm:text-sm mt-2">
-              Trained on industrial safety benchmarks, OSHA/ISO compliance rules, and equipment wear profiles.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {domains.map((d, i) => {
-              const Icon = d.icon;
-              return (
-                <div
-                  key={i}
-                  className="p-5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition space-y-3"
-                >
-                  <div className="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-sky-400">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-white">{d.title}</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">{d.desc}</p>
-                </div>
-              );
-            })}
-          </div>
+      {/* Industrial Domains Section */}
+      <section className="py-14 max-w-6xl mx-auto px-4 sm:px-6 w-full">
+        <div className="text-center space-y-1.5 mb-8">
+          <h2 className="text-[20px] sm:text-[22px] font-semibold text-[#F1F5F9]">
+            Inspection Domains Covered
+          </h2>
+          <p className="text-[13px] text-[#94A3B8]">
+            Automated defect classification across industrial operations.
+          </p>
         </div>
-      </section>
 
-      {/* 5-Step Process */}
-      <section className="py-16 bg-slate-900/40 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-10">
-            <span className="text-xs font-mono text-sky-400 uppercase tracking-wider">Inspection Architecture</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mt-1">
-              End-to-End Operational Workflow
-            </h2>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {domains.map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <div key={idx} className="vg-card p-4 space-y-2.5 flex flex-col justify-between">
+                <div>
+                  <div className="w-8 h-8 rounded bg-[#1E293B] border border-[#243247] flex items-center justify-center text-[#22C7E8] mb-2">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-[14px] font-semibold text-[#F1F5F9]">{item.title}</h3>
+                  <p className="text-[12px] text-[#94A3B8] leading-relaxed mt-1">{item.desc}</p>
+                </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-            {[
-              { num: '01', title: 'Upload Image', desc: 'Ingest site photos or mobile captures in JPG, PNG, or WEBP format.' },
-              { num: '02', title: 'Vision AI Analysis', desc: 'Multimodal neural network extracts spatial features and hazards.' },
-              { num: '03', title: 'Detect Hazards', desc: 'Isolate bounding coordinates, tag anomalies, and score risk severity.' },
-              { num: '04', title: 'Explain Findings', desc: 'Generate plain-English root causes with relevant safety citations.' },
-              { num: '05', title: 'Action & Report', desc: 'Assign corrective action tasks and export compliance audit reports.' },
-            ].map((step, idx) => (
-              <div key={idx} className="p-4 rounded-lg bg-slate-950 border border-slate-800 space-y-2">
-                <span className="text-xs font-mono text-sky-400 font-bold">{step.num}</span>
-                <h4 className="text-xs font-bold text-slate-200">{step.title}</h4>
-                <p className="text-[11px] text-slate-400 leading-relaxed">{step.desc}</p>
+                <span className="text-[10px] font-mono font-medium text-[#64748B]">
+                  Risk Threshold: {item.risk}
+                </span>
               </div>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center">
-            <Link
-              to="/inspections/new"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition"
-            >
-              <span>Launch Site Inspection</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+            );
+          })}
         </div>
       </section>
 

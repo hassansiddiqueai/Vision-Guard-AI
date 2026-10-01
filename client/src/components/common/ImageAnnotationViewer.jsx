@@ -25,7 +25,6 @@ export const ImageAnnotationViewer = ({
     // Format: [ymin, xmin, ymax, xmax] (e.g. Gemini 0-1000 format)
     if (Array.isArray(box) && box.length === 4) {
       const is1000 = box.some((v) => v > 1);
-      const scale = is1000 ? 10 : 100;
       const [ymin, xmin, ymax, xmax] = box;
       return {
         top: `${ymin / (is1000 ? 10 : 1)}%`,
@@ -57,38 +56,38 @@ export const ImageAnnotationViewer = ({
 
   const getSeverityBorder = (severity) => {
     const s = (severity || '').toUpperCase();
-    if (s === 'CRITICAL') return 'border-rose-500 bg-rose-500/20 text-rose-300';
-    if (s === 'HIGH') return 'border-orange-500 bg-orange-500/20 text-orange-300';
-    if (s === 'MEDIUM') return 'border-amber-500 bg-amber-500/20 text-amber-300';
-    return 'border-cyan-400 bg-cyan-500/20 text-cyan-300';
+    if (s === 'CRITICAL') return 'border-red-500 bg-red-500/10 text-red-300';
+    if (s === 'HIGH') return 'border-orange-500 bg-orange-500/10 text-orange-300';
+    if (s === 'MEDIUM') return 'border-amber-500 bg-amber-500/10 text-amber-300';
+    return 'border-cyan-400 bg-cyan-500/10 text-cyan-300';
   };
 
   return (
     <div
       ref={containerRef}
-      className={`relative bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex flex-col items-center justify-center select-none group ${
+      className={`relative bg-[#0B1220] rounded-lg overflow-hidden border border-[#243247] flex flex-col items-center justify-center select-none group ${
         isFullscreen ? 'fixed inset-0 z-50 rounded-none' : 'w-full h-full min-h-[380px] max-h-[620px]'
       }`}
     >
-      {/* HUD Header Toolbar */}
+      {/* Header Toolbar */}
       <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-2 pointer-events-auto bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-700/60 text-xs font-mono text-slate-300 shadow-lg">
+        <div className="flex items-center gap-2 pointer-events-auto bg-[#111C2E] px-3 py-1.5 rounded-md border border-[#243247] text-xs font-mono text-slate-300 shadow">
           <Crosshair className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="text-slate-400">TARGET:</span>
+          <span className="text-slate-400">ZOOM:</span>
           <span className="text-cyan-300 font-semibold">{zoom.toFixed(2)}x</span>
           {validAnnotations.length > 0 && (
-            <span className="ml-2 pl-2 border-l border-slate-700 text-emerald-400">
-              {validAnnotations.length} {validAnnotations.length === 1 ? 'Box' : 'Boxes'}
+            <span className="ml-2 pl-2 border-l border-[#243247] text-slate-300">
+              {validAnnotations.length} {validAnnotations.length === 1 ? 'Detection' : 'Detections'}
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 pointer-events-auto bg-slate-900/90 backdrop-blur-md p-1 rounded-lg border border-slate-700/60 shadow-lg">
+        <div className="flex items-center gap-1.5 pointer-events-auto bg-[#111C2E] p-1 rounded-md border border-[#243247] shadow">
           {validAnnotations.length > 0 && (
             <button
               onClick={() => setShowBoxes(!showBoxes)}
-              title={showBoxes ? 'Hide Bounding Boxes' : 'Show Bounding Boxes'}
-              className={`p-1.5 rounded hover:bg-slate-800 transition ${
+              title={showBoxes ? 'Hide Overlays' : 'Show Overlays'}
+              className={`p-1.5 rounded hover:bg-[#1E293B] transition ${
                 showBoxes ? 'text-cyan-400' : 'text-slate-500'
               }`}
             >
@@ -99,28 +98,28 @@ export const ImageAnnotationViewer = ({
           <button
             onClick={handleZoomIn}
             title="Zoom In"
-            className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-slate-800 transition"
+            className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-[#1E293B] transition"
           >
             <ZoomIn className="w-4 h-4" />
           </button>
           <button
             onClick={handleZoomOut}
             title="Zoom Out"
-            className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-slate-800 transition"
+            className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-[#1E293B] transition"
           >
             <ZoomOut className="w-4 h-4" />
           </button>
           <button
             onClick={handleResetZoom}
             title="Reset Zoom"
-            className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-slate-800 transition"
+            className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-[#1E293B] transition"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
             title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-            className="p-1.5 rounded text-slate-300 hover:text-cyan-400 hover:bg-slate-800 transition"
+            className="p-1.5 rounded text-slate-300 hover:text-cyan-400 hover:bg-[#1E293B] transition"
           >
             <Maximize2 className="w-4 h-4" />
           </button>
@@ -137,15 +136,15 @@ export const ImageAnnotationViewer = ({
             <img
               src={imageUrl}
               alt={alt}
-              className="max-h-[540px] w-auto object-contain rounded-lg shadow-2xl block border border-slate-800/80"
+              className="max-h-[540px] w-auto object-contain rounded-md shadow-lg block border border-[#243247]"
             />
           ) : (
-            <div className="w-96 h-64 bg-slate-900 flex items-center justify-center rounded-lg border border-dashed border-slate-800 text-slate-500 text-sm">
+            <div className="w-96 h-64 bg-[#111C2E] flex items-center justify-center rounded-md border border-dashed border-[#243247] text-slate-500 text-sm">
               No Image Loaded
             </div>
           )}
 
-          {/* Bounding Box Overlays (Only if backend provided coordinates) */}
+          {/* Bounding Box Overlays */}
           {showBoxes &&
             validAnnotations.map((item, idx) => {
               const box = item.box_2d || item.coordinates || item.bbox || item.location_box;
@@ -168,25 +167,20 @@ export const ImageAnnotationViewer = ({
                     width: coords.width,
                     height: coords.height,
                   }}
-                  className={`absolute border-2 transition-all cursor-pointer ${getSeverityBorder(severity)} ${
-                    isHovered ? 'ring-4 ring-cyan-400/40 z-30' : 'z-10'
+                  className={`absolute border transition-all cursor-pointer ${getSeverityBorder(severity)} ${
+                    isHovered ? 'ring-2 ring-cyan-400 z-30' : 'z-10'
                   }`}
                 >
-                  <div className="absolute -top-6 left-0 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-slate-950/90 border border-slate-700 shadow flex items-center gap-1 whitespace-nowrap">
+                  <div className="absolute -top-6 left-0 px-1.5 py-0.5 rounded text-[11px] font-medium bg-[#0B1220] border border-[#243247] shadow flex items-center gap-1.5 whitespace-nowrap">
                     <span>{label}</span>
-                    {conf && <span className="text-cyan-400">[{conf}]</span>}
+                    {conf && <span className="text-cyan-400 font-mono text-[10px]">{conf}</span>}
                   </div>
                 </div>
               );
             })}
         </div>
       </div>
-
-      {/* Grid overlay decorative accents */}
-      <div className="absolute inset-0 pointer-events-none border border-slate-800/40 rounded-xl" />
-      <div className="absolute bottom-2 right-3 text-[10px] font-mono text-slate-500 pointer-events-none">
-        VISIONGUARD // SENSOR MATRIX 1.0
-      </div>
     </div>
   );
 };
+

@@ -1,38 +1,27 @@
 import React, { useState } from 'react';
+import { useInspections } from '../context/InspectionContext';
 import {
   Bell,
   Eye,
   Sliders,
   CheckCircle2,
+  RotateCcw,
 } from 'lucide-react';
 
 export const SettingsPage = () => {
-  // Load real persistent settings from localStorage
+  const { resetDemo } = useInspections();
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('vg_app_settings');
     if (saved) {
       try {
         return JSON.parse(saved);
-      } catch (e) {
-        console.warn('Failed parsing settings:', e);
-      }
+      } catch (e) {}
     }
     return {
-      // Appearance
-      theme: 'dark-first',
       showCoordinatesOnScan: true,
-      highContrastAnnotations: true,
-      compactView: false,
-
-      // Notifications
-      notifyCriticalHazards: true,
-      notifyDailyDigest: false,
-      browserAudioAlerts: false,
-
-      // Vision Engine
+      browserAudioAlerts: true,
       confidenceThreshold: 75,
-      defaultCategory: 'Workplace Safety',
-      autoScanOnUpload: false,
+      defaultSite: 'Apex Tower — Zone B',
     };
   });
 
@@ -44,7 +33,8 @@ export const SettingsPage = () => {
       localStorage.setItem('vg_app_settings', JSON.stringify(updated));
       return updated;
     });
-    showSaveIndicator();
+    setSavedFeedback(true);
+    setTimeout(() => setSavedFeedback(false), 2000);
   };
 
   const handleChange = (key, value) => {
@@ -53,202 +43,116 @@ export const SettingsPage = () => {
       localStorage.setItem('vg_app_settings', JSON.stringify(updated));
       return updated;
     });
-    showSaveIndicator();
-  };
-
-  const showSaveIndicator = () => {
     setSavedFeedback(true);
-    setTimeout(() => setSavedFeedback(false), 2500);
+    setTimeout(() => setSavedFeedback(false), 2000);
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-3xl mx-auto space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-850">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#243247]">
         <div>
-          <h2 className="text-2xl font-bold font-display text-white">
-            System & Engine Settings
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Configure visual inspection parameters, notification triggers, and user interface preferences.
+          <h1 className="text-[22px] sm:text-[24px] font-semibold text-[#F1F5F9] tracking-tight">
+            Settings
+          </h1>
+          <p className="text-[13px] text-[#94A3B8] mt-0.5">
+            Configure system parameters, alert thresholds, and operational preferences.
           </p>
         </div>
 
         {savedFeedback && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono animate-fade-in">
+          <span className="text-[12px] text-[#22C55E] font-medium flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>PREFERENCES PERSISTED</span>
-          </div>
+            <span>Saved</span>
+          </span>
         )}
       </div>
 
-      <div className="space-y-6">
-        {/* Section 1: Appearance & Visual HUD */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-5">
-          <div className="flex items-center gap-2.5 pb-3 border-b border-slate-800">
-            <Eye className="w-4 h-4 text-cyan-400" />
-            <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-slate-200">
-              Visual HUD & Display Preferences
-            </h3>
-          </div>
+      {/* Vision Engine Settings */}
+      <div className="vg-card p-4 space-y-3">
+        <h2 className="text-[14px] font-semibold text-[#F1F5F9] flex items-center gap-2">
+          <Sliders className="w-4 h-4 text-[#22C7E8]" />
+          <span>Vision Engine Parameters</span>
+        </h2>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-semibold text-slate-200">
-                  Show Spatial Coordinates on Inspection Canvas
-                </p>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Render live bounding box labels and detection tags on analyzed images.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleToggle('showCoordinatesOnScan')}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  settings.showCoordinatesOnScan ? 'bg-cyan-500' : 'bg-slate-800'
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-slate-950 shadow ring-0 transition duration-200 ease-in-out ${
-                    settings.showCoordinatesOnScan ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
+        <div className="space-y-3 text-[13px] pt-1 border-t border-[#243247]">
+          <div>
+            <div className="flex justify-between mb-1 text-[#94A3B8]">
+              <span>Minimum Confidence Threshold</span>
+              <strong className="text-[#F1F5F9] font-mono">{settings.confidenceThreshold}%</strong>
             </div>
-
-            <div className="flex items-center justify-between pt-3 border-t border-slate-850">
-              <div>
-                <p className="text-xs sm:text-sm font-semibold text-slate-200">
-                  High-Contrast Hazard Overlays
-                </p>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Enforces maximum contrast neon outlines on Critical & High severity regions.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleToggle('highContrastAnnotations')}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  settings.highContrastAnnotations ? 'bg-cyan-500' : 'bg-slate-800'
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-slate-950 shadow ring-0 transition duration-200 ease-in-out ${
-                    settings.highContrastAnnotations ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 2: Vision AI Inference Engine Config */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-5">
-          <div className="flex items-center gap-2.5 pb-3 border-b border-slate-800">
-            <Sliders className="w-4 h-4 text-cyan-400" />
-            <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-slate-200">
-              Vision AI Engine Tuning
-            </h3>
+            <input
+              type="range"
+              min="50"
+              max="95"
+              step="5"
+              value={settings.confidenceThreshold}
+              onChange={(e) => handleChange('confidenceThreshold', Number(e.target.value))}
+              className="w-full h-1.5 bg-[#0B1220] rounded appearance-none cursor-pointer accent-[#22C7E8]"
+            />
           </div>
 
-          <div className="space-y-4">
+          <div className="flex items-center justify-between pt-2">
             <div>
-              <div className="flex items-center justify-between text-xs font-mono mb-2">
-                <span className="text-slate-300 font-semibold">Minimum Confidence Cutoff Filter</span>
-                <span className="text-cyan-400 font-bold">{settings.confidenceThreshold}%</span>
-              </div>
-              <input
-                type="range"
-                min="50"
-                max="95"
-                step="5"
-                value={settings.confidenceThreshold}
-                onChange={(e) => handleChange('confidenceThreshold', parseInt(e.target.value))}
-                className="w-full accent-cyan-400 cursor-pointer bg-slate-950 rounded-lg h-2"
-              />
-              <p className="text-[11px] text-slate-500 mt-1">
-                Detections with confidence below {settings.confidenceThreshold}% will be suppressed from immediate critical alerts.
-              </p>
+              <span className="text-[#F1F5F9] font-medium block">Show Bounding Box Annotations</span>
+              <span className="text-[11px] text-[#94A3B8]">Display spatial defect labels directly over visual canvas.</span>
             </div>
-
-            <div className="pt-3 border-t border-slate-850">
-              <label className="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-1.5">
-                Default Audit Category Preset
-              </label>
-              <select
-                value={settings.defaultCategory}
-                onChange={(e) => handleChange('defaultCategory', e.target.value)}
-                className="w-full py-2.5 px-3 bg-slate-950/80 border border-slate-800 focus:border-cyan-500 rounded-lg text-xs text-slate-300 font-mono"
-              >
-                <option value="Workplace Safety">Workplace Safety & PPE</option>
-                <option value="Construction">Construction & Scaffolding</option>
-                <option value="Equipment">Heavy Equipment & Machinery</option>
-                <option value="Infrastructure">Infrastructure & Facilities</option>
-                <option value="Other">General Visual Audit</option>
-              </select>
-            </div>
+            <input
+              type="checkbox"
+              checked={settings.showCoordinatesOnScan}
+              onChange={() => handleToggle('showCoordinatesOnScan')}
+              className="w-4 h-4 accent-[#22C7E8]"
+            />
           </div>
         </div>
+      </div>
 
-        {/* Section 3: Notification Alerts */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-5">
-          <div className="flex items-center gap-2.5 pb-3 border-b border-slate-800">
-            <Bell className="w-4 h-4 text-cyan-400" />
-            <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-slate-200">
-              Notifications & Hazard Dispatch
-            </h3>
-          </div>
+      {/* Notification Alerts */}
+      <div className="vg-card p-4 space-y-3">
+        <h2 className="text-[14px] font-semibold text-[#F1F5F9] flex items-center gap-2">
+          <Bell className="w-4 h-4 text-[#22C7E8]" />
+          <span>Alert Notifications</span>
+        </h2>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-semibold text-slate-200">
-                  Instant Alerts for Critical Hazards
-                </p>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Trigger high-priority alert banners when an inspection scores Critical risk.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleToggle('notifyCriticalHazards')}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  settings.notifyCriticalHazards ? 'bg-cyan-500' : 'bg-slate-800'
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-slate-950 shadow ring-0 transition duration-200 ease-in-out ${
-                    settings.notifyCriticalHazards ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
+        <div className="space-y-3 text-[13px] pt-1 border-t border-[#243247]">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[#F1F5F9] font-medium block">Web Audio Hazard Chimes</span>
+              <span className="text-[11px] text-[#94A3B8]">Sound audible chimes when Critical or High risks are detected.</span>
             </div>
-
-            <div className="flex items-center justify-between pt-3 border-t border-slate-850">
-              <div>
-                <p className="text-xs sm:text-sm font-semibold text-slate-200">
-                  Audio Cue upon Scan Completion
-                </p>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Play subtle telemetry chime when the neural pipeline finishes processing an image.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleToggle('browserAudioAlerts')}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  settings.browserAudioAlerts ? 'bg-cyan-500' : 'bg-slate-800'
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-slate-950 shadow ring-0 transition duration-200 ease-in-out ${
-                    settings.browserAudioAlerts ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            </div>
+            <input
+              type="checkbox"
+              checked={settings.browserAudioAlerts}
+              onChange={() => handleToggle('browserAudioAlerts')}
+              className="w-4 h-4 accent-[#22C7E8]"
+            />
           </div>
+        </div>
+      </div>
+
+      {/* Demo Maintenance */}
+      <div className="vg-card p-4 space-y-3">
+        <h2 className="text-[14px] font-semibold text-[#F1F5F9] flex items-center gap-2">
+          <RotateCcw className="w-4 h-4 text-[#22C7E8]" />
+          <span>Demo Data Maintenance</span>
+        </h2>
+
+        <div className="flex items-center justify-between pt-1 border-t border-[#243247] text-[13px]">
+          <div>
+            <span className="text-[#F1F5F9] font-medium block">Reset Application Demo State</span>
+            <span className="text-[11px] text-[#94A3B8]">Restore seed inspections, incidents, and camera statuses to default baseline.</span>
+          </div>
+          <button
+            onClick={() => {
+              if (window.confirm('Reset all demo state to default?')) {
+                resetDemo();
+                alert('Demo state reset successfully.');
+              }
+            }}
+            className="vg-btn-secondary text-[12px]"
+          >
+            Reset Demo Data
+          </button>
         </div>
       </div>
     </div>
