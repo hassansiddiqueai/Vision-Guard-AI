@@ -18,6 +18,7 @@ import { LiveDemoPage } from './pages/LiveDemoPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { LiveMonitoringPage } from './pages/LiveMonitoringPage';
 import { CameraManagementPage } from './pages/CameraManagementPage';
+import { CameraIntegrationsPage } from './pages/CameraIntegrationsPage';
 import { InspectionsListPage } from './pages/InspectionsListPage';
 import { NewInspectionPage } from './pages/NewInspectionPage';
 import { InspectionResultsPage } from './pages/InspectionResultsPage';
@@ -63,6 +64,8 @@ function App() {
               <Route path="/live-cameras" element={<LiveMonitoringPage />} />
               <Route path="/live-monitoring" element={<LiveMonitoringPage />} />
               <Route path="/cameras" element={<CameraManagementPage />} />
+              <Route path="/camera-install" element={<CameraIntegrationsPage />} />
+              <Route path="/integrations" element={<CameraIntegrationsPage />} />
               <Route path="/incidents" element={<IncidentsPage />} />
               <Route path="/risk-events" element={<IncidentsPage />} />
               <Route path="/inspections" element={<InspectionsListPage />} />

@@ -16,7 +16,9 @@ import {
   Shield,
   User,
   Activity,
-  CheckCircle2
+  CheckCircle2,
+  Cpu,
+  PlusCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useInspections } from '../../context/InspectionContext';
@@ -28,7 +30,8 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
 
   const navigationItems = [
     { name: 'Overview', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Live Cameras', path: '/live-cameras', icon: Radio },
+    { name: 'Live CCTV Matrix', path: '/live-cameras', icon: Radio },
+    { name: 'Camera Install', path: '/camera-install', icon: Camera, highlight: true },
     { name: 'Incidents', path: '/incidents', icon: AlertTriangle },
     { name: 'Inspections', path: '/inspections', icon: ClipboardList },
     { name: 'Sites', path: '/sites', icon: Building },
@@ -56,7 +59,7 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
         {/* Brand */}
         <div className="h-14 px-4 flex items-center border-b border-slate-800">
           <NavLink to="/dashboard" onClick={handleNavClick} className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-sky-600 flex items-center justify-center text-white font-bold shrink-0">
+            <div className="w-7 h-7 rounded-md bg-sky-600 flex items-center justify-center text-white font-bold shrink-0 shadow-sm">
               <Shield className="w-4 h-4" />
             </div>
             <div>
@@ -70,7 +73,7 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
 
         {/* Navigation Items */}
         <div className="p-3 space-y-1">
-          <p className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <p className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
             Operations & Monitoring
           </p>
           {navigationItems.map((item) => {
@@ -81,15 +84,24 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
                 to={item.path}
                 onClick={handleNavClick}
                 className={({ isActive }) =>
-                  `flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs font-medium transition ${
+                  `flex items-center justify-between px-2.5 py-2 rounded-md text-xs font-medium transition ${
                     isActive
-                      ? 'bg-sky-700 text-white font-semibold shadow-xs'
+                      ? 'bg-sky-600 text-white font-semibold shadow-md'
+                      : item.highlight
+                      ? 'text-sky-300 hover:text-white hover:bg-slate-800/80'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
                   }`
                 }
               >
-                <Icon className="w-4 h-4 shrink-0" />
-                <span>{item.name}</span>
+                <div className="flex items-center gap-2.5">
+                  <Icon className={`w-4 h-4 shrink-0 ${item.highlight ? 'text-sky-400' : ''}`} />
+                  <span>{item.name}</span>
+                </div>
+                {item.highlight && (
+                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-sky-950 text-sky-300 border border-sky-700">
+                    LIVE
+                  </span>
+                )}
               </NavLink>
             );
           })}
@@ -107,8 +119,8 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
             </span>
             <span className="text-emerald-400 font-mono">100% OK</span>
           </div>
-          <p className="text-[10px] text-slate-400">
-            Cameras &bull; CV Engine &bull; Alert Gateway
+          <p className="text-[10px] text-slate-400 font-mono">
+            CCTV &bull; Neural Inference &bull; Alerts
           </p>
         </div>
 
@@ -144,5 +156,3 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
     </aside>
   );
 };
-
-

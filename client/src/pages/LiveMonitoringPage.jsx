@@ -185,6 +185,16 @@ export const LiveMonitoringPage = () => {
             </button>
           </div>
 
+          {/* Camera Install / Discovery Link */}
+          <button
+            onClick={() => navigate('/camera-install')}
+            className="vg-btn-secondary text-xs flex items-center gap-1.5"
+            title="Install Hardware Webcam or RTSP Stream"
+          >
+            <Camera className="w-3.5 h-3.5 text-sky-400" />
+            <span>Install Camera</span>
+          </button>
+
           {/* Add Camera Button */}
           <button
             onClick={() => {
@@ -194,7 +204,7 @@ export const LiveMonitoringPage = () => {
             className="vg-btn-primary text-xs flex items-center gap-1.5 shadow-md"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Add Camera</span>
+            <span>Quick Add</span>
           </button>
         </div>
       </div>
