@@ -26,20 +26,15 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
   const { systemHealth } = useInspections();
   const navigate = useNavigate();
 
-  const overviewNav = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+  const navigationItems = [
+    { name: 'Overview', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Live Cameras', path: '/live-cameras', icon: Radio },
-    { name: 'Cameras', path: '/cameras', icon: Camera },
+    { name: 'Incidents', path: '/incidents', icon: AlertTriangle },
     { name: 'Inspections', path: '/inspections', icon: ClipboardList },
-    { name: 'Risk Events', path: '/risk-events', icon: AlertTriangle },
-    { name: 'Site Map', path: '/site-map', icon: MapPin },
-    { name: 'Reports', path: '/reports', icon: FileText },
-    { name: 'Analytics', path: '/analytics', icon: BarChart3 },
-  ];
-
-  const managementNav = [
-    { name: 'Team & Roles', path: '/team', icon: Users },
     { name: 'Sites', path: '/sites', icon: Building },
+    { name: 'Safety Zones', path: '/safety-zones', icon: MapPin },
+    { name: 'Analytics', path: '/analytics', icon: BarChart3 },
+    { name: 'Evidence', path: '/evidence', icon: FileText },
     { name: 'Settings', path: '/settings', icon: Settings },
   ];
 
@@ -73,12 +68,12 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
           </NavLink>
         </div>
 
-        {/* Overview Navigation */}
+        {/* Navigation Items */}
         <div className="p-3 space-y-1">
           <p className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Overview
+            Operations & Monitoring
           </p>
-          {overviewNav.map((item) => {
+          {navigationItems.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink
@@ -86,45 +81,18 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
                 to={item.path}
                 onClick={handleNavClick}
                 className={({ isActive }) =>
-                  `flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition ${
+                  `flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs font-medium transition ${
                     isActive
-                      ? 'bg-sky-700 text-white shadow-sm'
+                      ? 'bg-sky-700 text-white font-semibold shadow-xs'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
                   }`
                 }
               >
-                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <Icon className="w-4 h-4 shrink-0" />
                 <span>{item.name}</span>
               </NavLink>
             );
           })}
-
-          {/* Management Section */}
-          <div className="pt-3">
-            <p className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Management
-            </p>
-            {managementNav.map((item) => {
-              const Icon = item.icon;
-              return (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  onClick={handleNavClick}
-                  className={({ isActive }) =>
-                    `flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition ${
-                      isActive
-                        ? 'bg-sky-700 text-white shadow-sm'
-                        : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-                    }`
-                  }
-                >
-                  <Icon className="w-3.5 h-3.5 shrink-0" />
-                  <span>{item.name}</span>
-                </NavLink>
-              );
-            })}
-          </div>
         </div>
       </div>
 

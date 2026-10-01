@@ -146,52 +146,52 @@ export const AppLayout = () => {
               />
             </form>
 
-            {/* System Health Status Popover Button */}
+            {/* System Status Indicator */}
             <div className="relative">
               <button
                 onClick={() => setShowHealthPopover(!showHealthPopover)}
-                className="hidden sm:flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs text-slate-700 font-semibold transition"
-                title="System Health & Telemetry"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-xs text-emerald-800 font-semibold transition"
+                title="Vision Engine Status"
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[11px] hidden md:inline">Systems OK</span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="text-[11px] hidden sm:inline font-mono">Vision Engine Online</span>
+                <ChevronDown className="w-3 h-3 text-emerald-600 hidden sm:inline" />
               </button>
 
               {showHealthPopover && (
-                <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-md shadow-lg z-50 p-3 space-y-2">
+                <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-md shadow-lg z-50 p-3 space-y-2.5">
                   <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
                     <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                       <Activity className="w-3.5 h-3.5 text-emerald-600" />
-                      Platform Health
+                      Vision Engine Telemetry
                     </span>
                     <button onClick={() => setShowHealthPopover(false)} className="text-slate-400 hover:text-slate-600">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <div className="space-y-1.5 text-xs">
+                  <div className="space-y-2 text-xs">
                     <div className="flex items-center justify-between text-slate-700">
-                      <span>Camera Ingestion Stream</span>
+                      <span>Vision Engine Pipeline</span>
                       <span className="text-emerald-700 font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> Operational
+                        <CheckCircle2 className="w-3 h-3" /> Online (Active)
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-slate-700">
-                      <span>AI Neural CV Engine</span>
-                      <span className="text-emerald-700 font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> 85ms Latency
+                      <span>Inference Latency (Avg)</span>
+                      <span className="text-slate-800 font-mono font-bold">
+                        84ms
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-slate-700">
-                      <span>Real-Time Alert Gateway</span>
-                      <span className="text-emerald-700 font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> Operational
+                      <span>Active Camera Feeds</span>
+                      <span className="text-slate-800 font-mono font-bold">
+                        18/18 Online
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-slate-700">
-                      <span>Telemetry Database</span>
-                      <span className="text-emerald-700 font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> Synced
+                      <span>Stream Gateway Protocol</span>
+                      <span className="text-slate-800 font-mono font-bold">
+                        WebRTC / RTSP
                       </span>
                     </div>
                   </div>
@@ -199,22 +199,25 @@ export const AppLayout = () => {
               )}
             </div>
 
-            {/* AI Assistant Button */}
-            <button
-              onClick={() => setIsAssistantOpen(true)}
-              title="Open AI Safety Assistant"
-              className="p-1.5 sm:px-2.5 py-1.5 rounded-md bg-sky-50 text-sky-800 hover:bg-sky-100 border border-sky-200 text-xs font-semibold flex items-center gap-1.5 transition"
+            {/* Active Incidents Badge */}
+            <Link
+              to="/incidents"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-xs font-bold text-red-700 transition"
+              title="Active Incidents"
             >
-              <Bot className="w-3.5 h-3.5 text-sky-700" />
-              <span className="hidden md:inline">Safety AI</span>
-            </button>
+              <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+              <span className="hidden sm:inline">Active Incidents:</span>
+              <span className="w-4 h-4 rounded bg-red-600 text-white text-[10px] font-mono flex items-center justify-center font-bold">
+                {incidents.filter((i) => i.status !== 'CLOSED').length}
+              </span>
+            </Link>
 
-            {/* Real-time Notifications Menu */}
+            {/* Notifications Menu */}
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="relative p-1.5 rounded-md bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 transition border border-slate-200"
-                title="Active Safety Alerts"
+                title="Incident Notifications"
               >
                 <Bell className="w-4 h-4" />
                 {activeAlerts.length > 0 && (
@@ -228,7 +231,7 @@ export const AppLayout = () => {
                 <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-md shadow-xl z-50 p-3 space-y-2">
                   <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                     <span className="text-xs font-bold text-slate-900">
-                      Live Incident Notifications ({activeAlerts.length})
+                      Incident Alerts ({activeAlerts.length})
                     </span>
                     <button
                       onClick={() => setShowNotifications(false)}
@@ -245,7 +248,7 @@ export const AppLayout = () => {
                       activeAlerts.map((inc) => (
                         <Link
                           key={inc.id}
-                          to="/risk-events"
+                          to="/incidents"
                           onClick={() => setShowNotifications(false)}
                           className="block p-2 rounded-md bg-slate-50 border border-slate-200 hover:border-slate-300 transition text-xs space-y-0.5"
                         >
@@ -264,33 +267,29 @@ export const AppLayout = () => {
 
                   <div className="pt-2 border-t border-slate-100 text-center">
                     <Link
-                      to="/risk-events"
+                      to="/incidents"
                       onClick={() => setShowNotifications(false)}
                       className="text-xs text-sky-700 hover:underline font-bold"
                     >
-                      View All Risk Events &rarr;
+                      View All Incidents &rarr;
                     </Link>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* + New Inspection Button */}
-            {location.pathname !== '/inspections/new' && (
-              <Link to="/inspections/new" className="vg-btn-primary text-xs py-1.5 px-3">
-                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span className="hidden sm:inline">New Audit</span>
-              </Link>
-            )}
+            {/* Profile Avatar */}
+            <Link
+              to="/profile"
+              className="flex items-center gap-1.5 p-1 rounded-md hover:bg-slate-100 transition border border-transparent hover:border-slate-200"
+              title="User Profile"
+            >
+              <div className="w-7 h-7 rounded bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
+                {user?.name?.charAt(0) || 'M'}
+              </div>
+            </Link>
           </div>
         </header>
-
-        {/* Global Demo Scenario Quick Bar (Only on Dashboard or Live Monitoring) */}
-        {(location.pathname === '/dashboard' || location.pathname === '/live-cameras' || location.pathname === '/live-monitoring') && (
-          <div className="bg-slate-100 border-b border-slate-200 px-4 sm:px-6 py-2">
-            <DemoScenarioToolbar />
-          </div>
-        )}
 
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto">

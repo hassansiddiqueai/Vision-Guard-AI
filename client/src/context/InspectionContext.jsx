@@ -343,6 +343,62 @@ export const SEED_INSPECTIONS = [
   }
 ];
 
+export const SEED_ZONES = [
+  { id: 'Z-1', name: 'Fall Hazard Edge Zone', type: 'Fall Hazard', site: 'Apex Tower Project', camera: 'CAM-001 (North Scaffolding)', status: 'CRITICAL / BREACHED', breaches: 1, color: '#DC2626', desc: 'Unprotected leading slab edge at Level 6 elevation.' },
+  { id: 'Z-2', name: 'Worker Staging Area', type: 'Worker Staging', site: 'Apex Tower Project', camera: 'CAM-001 (North Scaffolding)', status: 'NORMAL', breaches: 0, color: '#16A34A', desc: 'Pre-shift toolbox talk and harness inspection staging.' },
+  { id: 'Z-3', name: 'Machinery Swing Exclusion Radius', type: 'Machine Exclusion', site: 'Harbor Gateway Logistics Yard', camera: 'CAM-002 (Heavy Equipment)', status: 'MONITORED', breaches: 0, color: '#EA580C', desc: '3-meter perimeter around hydraulic excavator boom slew arc.' },
+  { id: 'Z-4', name: 'Vehicle Transit Corridor', type: 'Restricted Area', site: 'Harbor Gateway Logistics Yard', camera: 'CAM-002 (Heavy Equipment)', status: 'NORMAL', breaches: 0, color: '#CA8A04', desc: 'High-visibility vest required vehicle corridor.' },
+  { id: 'Z-5', name: 'Trench Excavation Perimeter', type: 'Fall Hazard', site: 'Eastside Medical Center Phase 2', camera: 'CAM-003 (Basement Pour)', status: 'NORMAL', breaches: 0, color: '#DC2626', desc: 'Sub-grade trench edge clearance zone.' },
+  { id: 'Z-6', name: '36-Inch High-Voltage Clearance Arc', type: 'Restricted Area', site: 'Substation 4 Infrastructure', camera: 'CAM-004 (Substation Bay)', status: 'NORMAL', breaches: 0, color: '#DC2626', desc: 'NFPA 70E mandatory switchgear working space.' },
+  { id: 'Z-7', name: 'Suspended Load Drop Radius', type: 'Machine Exclusion', site: 'Apex Tower Project', camera: 'CAM-005 (Crane Hoist)', status: 'NORMAL', breaches: 0, color: '#DC2626', desc: 'Overhead crane travel envelope and drop zone.' },
+  { id: 'Z-8', name: 'Emergency Exit Egress Corridor', type: 'Emergency Exit', site: 'Substation 4 Infrastructure', camera: 'CAM-004 (Substation Bay)', status: 'NORMAL', breaches: 0, color: '#16A34A', desc: 'Clear egress pathway to exterior muster point.' },
+];
+
+export const SEED_EVIDENCE = [
+  {
+    id: 'EVD-901',
+    incidentId: 'INC-104',
+    hazard: 'Missing Scaffolding Lock Pin',
+    camera: 'CAM-001 (North Scaffolding)',
+    site: 'Apex Tower Project',
+    location: 'Grid Sector 4B, Level 6 Platform',
+    timestamp: '2026-10-01 08:32:14',
+    confidence: 98.4,
+    imageUrl: 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=1000&auto=format&fit=crop',
+    fileSize: '4.2 MB',
+    resolution: '2560x1440',
+    detectionBox: [180, 420, 520, 780]
+  },
+  {
+    id: 'EVD-902',
+    incidentId: 'INC-103',
+    hazard: 'Exposed Machine Pulley Assembly',
+    camera: 'CAM-002 (Heavy Equipment)',
+    site: 'Harbor Gateway Logistics Yard',
+    location: 'Excavator Yard 3',
+    timestamp: '2026-09-30 14:18:05',
+    confidence: 96.0,
+    imageUrl: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=1000&auto=format&fit=crop',
+    fileSize: '3.8 MB',
+    resolution: '1920x1080',
+    detectionBox: [200, 580, 540, 880]
+  },
+  {
+    id: 'EVD-903',
+    incidentId: 'INC-102',
+    hazard: 'Uncapped Vertical Rebar Dowels',
+    camera: 'CAM-003 (Basement Pour)',
+    site: 'Eastside Medical Center Phase 2',
+    location: 'Sub-grade Basement Trench',
+    timestamp: '2026-09-30 10:05:22',
+    confidence: 97.9,
+    imageUrl: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1000&auto=format&fit=crop',
+    fileSize: '2.9 MB',
+    resolution: '2560x1440',
+    detectionBox: [480, 180, 880, 650]
+  }
+];
+
 export const SEED_INCIDENTS = [
   {
     id: 'INC-104',
@@ -356,13 +412,22 @@ export const SEED_INCIDENTS = [
     detectedAt: '2026-10-01 08:32',
     status: 'ASSIGNED', // 'DETECTED' | 'ACKNOWLEDGED' | 'ASSIGNED' | 'CORRECTIVE_ACTION' | 'VERIFICATION' | 'CLOSED'
     assignedTo: 'Marcus Vance (Site Safety Lead)',
+    humanVerification: 'Verified',
     evidenceImage: 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=600&auto=format&fit=crop',
     afterImage: null,
     explanation: 'Scaffold framework lacks primary diagonal brace locking fastener under dynamic loading.',
-    recommendedAction: 'Halt elevated work, red-tag scaffold, and insert certified Grade-8 pin.',
+    whyDangerous: 'Structural instability under dynamic wind and worker loads can cause sudden, catastrophic scaffold collapse at 18m height.',
+    recommendedAction: 'Halt elevated work immediately, red-tag scaffold access ladder, and insert certified Grade-8 locking pin.',
     correctiveActionNotes: 'Maintenance crew dispatched with replacement locking pin kit.',
     dueDate: '2026-10-01 11:00',
     verificationRequired: true,
+    timeline: [
+      { time: '08:32:14', label: 'Optical anomaly detected on CAM-001 (North Scaffolding)', status: 'done' },
+      { time: '08:32:16', label: 'Vision Engine classified CRITICAL risk (98.4% confidence)', status: 'done' },
+      { time: '08:32:19', label: 'Human verification requested from site supervisor', status: 'done' },
+      { time: '08:33:02', label: 'Marcus Vance confirmed condition & acknowledged event', status: 'done' },
+      { time: '08:34:40', label: 'Corrective action assigned: Red-tag scaffold and install Grade-8 fastener', status: 'in-progress' }
+    ]
   },
   {
     id: 'INC-103',
@@ -376,13 +441,21 @@ export const SEED_INCIDENTS = [
     detectedAt: '2026-09-30 14:18',
     status: 'CORRECTIVE_ACTION',
     assignedTo: 'Dave Miller (Fleet Lead)',
+    humanVerification: 'Verified',
     evidenceImage: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=600&auto=format&fit=crop',
     afterImage: null,
     explanation: 'Rotating belt drive pulley is exposed without physical safety barrier.',
-    recommendedAction: 'Lockout equipment and install bolted steel guard enclosure.',
+    whyDangerous: 'High-speed exposed rotating pulleys create fatal pinch-point and limb entrapment hazards for nearby ground workers.',
+    recommendedAction: 'Lockout equipment and install bolted steel guard enclosure before equipment returns to service.',
     correctiveActionNotes: 'Steel guard enclosure fabricating in machine shop.',
     dueDate: '2026-09-30 18:00',
     verificationRequired: true,
+    timeline: [
+      { time: '14:18:05', label: 'Exposed rotating component isolated by CV model', status: 'done' },
+      { time: '14:18:08', label: 'HIGH severity hazard logged to Harbor Gateway log', status: 'done' },
+      { time: '14:19:12', label: 'Dave Miller acknowledged and enacted machine lockout', status: 'done' },
+      { time: '14:35:00', label: 'Corrective action in progress: Custom guard fabrication', status: 'in-progress' }
+    ]
   },
   {
     id: 'INC-102',
@@ -396,14 +469,22 @@ export const SEED_INCIDENTS = [
     detectedAt: '2026-09-30 10:05',
     status: 'CLOSED',
     assignedTo: 'Foundation Subcontractor',
+    humanVerification: 'Verified',
     evidenceImage: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=600&auto=format&fit=crop',
     afterImage: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=600&auto=format&fit=crop',
-    explanation: 'Vertical sharp cut-steel rebars presented immediate puncture risk.',
-    recommendedAction: 'Install steel-reinforced OSHA rebar caps.',
-    correctiveActionNotes: '14 safety mushroom caps installed and verified by inspector Elena Rostova.',
-    dueDate: '2026-09-30 12:00',
+    explanation: '14 exposed vertical steel rebar ends without protective OSHA mushroom caps.',
+    whyDangerous: 'Protruding cut steel dowels in active worker transit paths create severe impalement and puncture injury hazards.',
+    recommendedAction: 'Install steel-reinforced OSHA rebar caps immediately across all dowels.',
+    correctiveActionNotes: 'Caps installed across all 14 dowels. Verified resolved.',
+    dueDate: '2026-09-30 11:00',
+    verificationRequired: true,
     resolvedAt: '2026-09-30 11:15',
-    verificationRequired: false,
+    timeline: [
+      { time: '10:05:22', label: 'Uncapped dowels detected by Trench sensor CAM-003', status: 'done' },
+      { time: '10:06:00', label: 'Work halted in immediate trench bay', status: 'done' },
+      { time: '10:20:15', label: 'OSHA rebar safety caps installed by subcontractor', status: 'done' },
+      { time: '11:15:00', label: 'Visual verification complete & incident closed', status: 'done' }
+    ]
   },
   {
     id: 'INC-101',
@@ -461,6 +542,28 @@ export const InspectionProvider = ({ children }) => {
     return SEED_INCIDENTS;
   });
 
+  const [zones, setZones] = useState(() => {
+    const saved = localStorage.getItem('vg_zones_store');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return SEED_ZONES;
+  });
+
+  const [evidence, setEvidence] = useState(() => {
+    const saved = localStorage.getItem('vg_evidence_store');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return SEED_EVIDENCE;
+  });
+
   const [notifications, setNotifications] = useState([
     {
       id: 'NOTIF-1',
@@ -504,6 +607,14 @@ export const InspectionProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('vg_incidents_store', JSON.stringify(incidents));
   }, [incidents]);
+
+  useEffect(() => {
+    localStorage.setItem('vg_zones_store', JSON.stringify(zones));
+  }, [zones]);
+
+  useEffect(() => {
+    localStorage.setItem('vg_evidence_store', JSON.stringify(evidence));
+  }, [evidence]);
 
   // Alert trigger with audio chime
   const triggerHazardAlert = (alertData) => {
@@ -741,6 +852,65 @@ export const InspectionProvider = ({ children }) => {
     );
   };
 
+  const escalateIncident = (incidentId, reason = 'Escalated to Corporate HSE Director') => {
+    const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+    setIncidents((prev) =>
+      prev.map((inc) => {
+        if (inc.id === incidentId) {
+          const newTimeline = [
+            ...(inc.timeline || []),
+            { time: timestamp, event: `Incident escalated to HSE Director: ${reason}`, status: 'ESCALATED', type: 'escalation' }
+          ];
+          return {
+            ...inc,
+            status: 'ESCALATED',
+            severity: 'CRITICAL',
+            timeline: newTimeline,
+          };
+        }
+        return inc;
+      })
+    );
+  };
+
+  const verifyIncident = (incidentId, verificationStatus, reviewerNotes = '') => {
+    const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+    setIncidents((prev) =>
+      prev.map((inc) => {
+        if (inc.id === incidentId) {
+          const newTimeline = [
+            ...(inc.timeline || []),
+            { time: timestamp, event: `Human verification completed: ${verificationStatus}. ${reviewerNotes}`, status: verificationStatus, type: 'verification' }
+          ];
+          return {
+            ...inc,
+            humanVerification: verificationStatus,
+            verificationRequired: verificationStatus === 'PENDING',
+            timeline: newTimeline,
+            notesList: reviewerNotes ? [...(inc.notesList || []), { id: Date.now(), author: 'Duty Safety Officer', text: reviewerNotes, date: new Date().toISOString().slice(0, 16).replace('T', ' ') }] : inc.notesList
+          };
+        }
+        return inc;
+      })
+    );
+  };
+
+  const updateZone = (zoneId, zoneData) => {
+    setZones((prev) =>
+      prev.map((z) => (z.id === zoneId ? { ...z, ...zoneData } : z))
+    );
+  };
+
+  const addEvidence = (evidenceData) => {
+    const newEvd = {
+      id: `EVD-${Math.floor(100 + Math.random() * 900)}`,
+      timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
+      ...evidenceData,
+    };
+    setEvidence((prev) => [newEvd, ...prev]);
+    return newEvd;
+  };
+
   // Run Safety Scenarios (Interactive Demo Mode)
   const runSafetyScenario = (scenarioKey) => {
     setActiveScenario(scenarioKey);
@@ -894,8 +1064,12 @@ export const InspectionProvider = ({ children }) => {
     setCameras(SEED_CAMERAS);
     setInspections(SEED_INSPECTIONS);
     setIncidents(SEED_INCIDENTS);
+    setZones(SEED_ZONES);
+    setEvidence(SEED_EVIDENCE);
     localStorage.setItem('vg_inspections_store', JSON.stringify(SEED_INSPECTIONS));
     localStorage.setItem('vg_incidents_store', JSON.stringify(SEED_INCIDENTS));
+    localStorage.setItem('vg_zones_store', JSON.stringify(SEED_ZONES));
+    localStorage.setItem('vg_evidence_store', JSON.stringify(SEED_EVIDENCE));
     setActiveAlert(null);
     setActiveScenario(null);
   };
@@ -968,6 +1142,17 @@ export const InspectionProvider = ({ children }) => {
     const onlineCameras = filteredCameras.filter((c) => c.status === 'ONLINE').length;
     const offlineCameras = filteredCameras.length - onlineCameras;
 
+    // Site worker mappings
+    const siteWorkersMap = {
+      'Apex Tower Project': 48,
+      'Harbor Gateway Logistics Yard': 36,
+      'Eastside Medical Center Phase 2': 28,
+      'Substation 4 Infrastructure': 15,
+    };
+    const workersMonitored = selectedSite === 'All Sites' 
+      ? 127 
+      : (siteWorkersMap[selectedSite] || 32);
+
     return {
       total,
       criticalHazards,
@@ -984,6 +1169,7 @@ export const InspectionProvider = ({ children }) => {
       onlineCamerasCount: onlineCameras,
       offlineCamerasCount: offlineCameras,
       totalCamerasCount: filteredCameras.length,
+      workersMonitored,
     };
   };
 
@@ -998,6 +1184,12 @@ export const InspectionProvider = ({ children }) => {
         updateCamera,
         deleteCamera,
         testCameraConnection,
+        zones,
+        setZones,
+        updateZone,
+        evidence,
+        setEvidence,
+        addEvidence,
         inspections,
         incidents,
         teamMembers,
@@ -1024,6 +1216,8 @@ export const InspectionProvider = ({ children }) => {
         addIncident,
         updateIncidentStatus,
         assignIncident,
+        escalateIncident,
+        verifyIncident,
         acknowledgeEvent,
         assignEvent,
         resolveEvent,
