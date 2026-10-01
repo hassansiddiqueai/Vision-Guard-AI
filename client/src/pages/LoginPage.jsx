@@ -25,10 +25,10 @@ export const LoginPage = () => {
 
   const backgroundScenes = [
     {
-      title: 'Scaffolding Elevation Tier 6',
+      title: 'Scaffolding & Rebar Work Tier 6',
       site: 'Apex Tower Project',
-      image: 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=1600&auto=format&fit=crop',
-      hazard: 'FALL ARREST HARNESS REQUIRED',
+      image: '/assets/construction-site-bg.jpg',
+      hazard: 'ELEVATED REBAR WORK • TIE-OFF REQUIRED',
       status: 'CRITICAL HAZARD',
       color: 'border-red-500 text-red-400 bg-red-950/60',
     },

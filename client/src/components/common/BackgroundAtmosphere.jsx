@@ -7,12 +7,12 @@ export const BackgroundAtmosphere = ({ variant = 'light' }) => {
   const backgroundPhotos = [
     {
       id: 'NODE-01',
-      title: 'Scaffolding Bay Tier 4',
-      site: 'Apex Tower',
-      tag: 'NO HARNESS 91%',
-      status: 'CRITICAL',
+      title: 'Scaffolding & Rebar Cage Tier 4',
+      site: 'Apex Tower Scaffolding',
+      tag: 'NO HARNESS 94%',
+      status: 'CRITICAL HAZARD',
       statusColor: 'text-red-600 bg-red-50 border-red-200',
-      image: 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=600&auto=format&fit=crop',
+      image: '/assets/construction-site-bg.jpg',
       position: 'top-12 left-6 lg:left-12',
       rotation: '-rotate-2',
       delay: '0s',
@@ -57,6 +57,26 @@ export const BackgroundAtmosphere = ({ variant = 'light' }) => {
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 select-none">
+      {/* 0. Full-Screen Ambient Industrial Construction Background Photo Layer */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="/assets/construction-site-bg.jpg"
+          alt="Construction Site Telemetry Background"
+          className={`w-full h-full object-cover filter contrast-110 transition-transform duration-1000 ${
+            variant === 'dark'
+              ? 'opacity-15 brightness-75 scale-105'
+              : 'opacity-[0.07] brightness-105 scale-100'
+          }`}
+        />
+        <div
+          className={`absolute inset-0 ${
+            variant === 'dark'
+              ? 'bg-gradient-to-t from-slate-950 via-slate-950/90 to-slate-950/70'
+              : 'bg-gradient-to-t from-[#F8FAFC] via-[#F8FAFC]/90 to-[#F8FAFC]/80'
+          }`}
+        />
+      </div>
+
       {/* 1. Base Grid Layer */}
       <div
         className={`absolute inset-0 ${

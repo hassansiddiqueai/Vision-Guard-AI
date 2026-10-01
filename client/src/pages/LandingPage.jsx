@@ -53,11 +53,11 @@ export const LandingPage = () => {
   const showcaseSites = [
     {
       id: 'CAM-001',
-      name: 'Apex Tower Scaffolding Tier 6',
+      name: 'Apex Tower Column Rebar & Scaffolding Tier 6',
       site: 'Apex Tower Project',
-      type: 'Fall Hazard & PPE Monitoring',
-      imageUrl: 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=1200&auto=format&fit=crop',
-      tag: 'NO HELMET • 94% CONFIDENCE',
+      type: 'Fall Hazard & High-Elevation Rebar Work',
+      imageUrl: '/assets/construction-site-bg.jpg',
+      tag: 'MISSING HARNESS AT ELEVATION • 94%',
       status: 'CRITICAL',
       statusColor: 'bg-red-600',
     },

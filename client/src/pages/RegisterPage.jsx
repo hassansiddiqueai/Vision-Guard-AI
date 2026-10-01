@@ -64,7 +64,7 @@ export const RegisterPage = () => {
       {/* Real Industrial Photo Background with Dark Gradient Overlay */}
       <div className="absolute inset-0 z-0">
         <img
-          src="https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=1600&auto=format&fit=crop"
+          src="/assets/construction-site-bg.jpg"
           alt="Industrial Site Background"
           className="w-full h-full object-cover opacity-25 filter brightness-75 contrast-125 scale-105 transition-transform duration-1000"
         />
