@@ -1,211 +1,277 @@
-<div align="center">
+# VisionGuard AI — AI-Powered Safety Control Center
 
-# 🛡️ VisionGuard AI
-### *"See What Humans Miss."*
+[![License: MIT](https://img.shields.io/badge/License-MIT-cyan.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/Node.js-18.x%20%7C%2020.x-emerald.svg)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-19.x%20%7C%20Vite-sky.svg)](https://vitejs.dev/)
+[![AI Engine](https://img.shields.io/badge/AI%20Engine-Gemini%20Vision%20%7C%20Edge%20CV-violet.svg)](https://ai.google.dev/)
+[![Safety Standard](https://img.shields.io/badge/Compliance-OSHA%201926%20%7C%20ISO%2045001-amber.svg)](https://www.osha.gov/)
 
-**Autonomous AI-Powered Visual Inspection & Anomaly Detection Platform for Industrial, Construction, and Critical Infrastructure Safety.**
-
-[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=black&style=for-the-badge)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-8.3-646CFF?logo=vite&logoColor=white&style=for-the-badge)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38BDF8?logo=tailwindcss&logoColor=white&style=for-the-badge)](https://tailwindcss.com/)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs&logoColor=white&style=for-the-badge)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-5.2-000000?logo=express&logoColor=white&style=for-the-badge)](https://expressjs.com/)
-[![Google Gemini](https://img.shields.io/badge/Google_Gemini-Vision_AI-4285F4?logo=google&logoColor=white&style=for-the-badge)](https://deepmind.google/technologies/gemini/)
-[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_%26_Storage-3ECF8E?logo=supabase&logoColor=white&style=for-the-badge)](https://supabase.com/)
-
-[Key Features](#-key-features) • [5-Stage AI Pipeline](#-the-5-stage-autonomous-pipeline) • [Architecture](#-system-architecture) • [API Reference](#-api-endpoints) • [Quickstart](#-getting-started) • [Security](#-security--data-privacy)
+**VisionGuard AI** is a production-style Computer Vision and Visual Intelligence platform engineered to detect safety hazards, anomalies, PPE non-compliance, and catastrophic risks in real-time across high-risk industrial environments such as construction sites, scaffolding matrices, heavy machinery yards, and electrical infrastructure.
 
 ---
 
-</div>
+## 1. Project Overview
 
-## 📌 Executive Summary
-
-Manual visual audits on construction sites, industrial facilities, and manufacturing lines are slow, inconsistent, and prone to human fatigue. Hairline fractures, unanchored safety harnesses, missing machine guards, and chemical weeping slip past manual spot-checks—escalating into catastrophic failures and severe regulatory penalties.
-
-**VisionGuard AI** bridges this critical gap by providing an enterprise-grade visual intelligence engine. Inspectors upload high-resolution field photos or mobile captures, and VisionGuard’s multimodal vision models detect hazards, isolate spatial bounding coordinates, calculate statistical confidence ratings, cite regulatory standards (OSHA/ISO), and deliver immediate corrective action plans.
-
----
-
-## ✨ Key Features
-
-- 🎯 **Multimodal Anomaly Detection**: Identifies subtle structural fissures, missing PPE, unshielded mechanical pinch-points, exposed rebar, and blocked emergency egresses.
-- 📐 **Spatial HUD & Coordinate Overlays**: Renders dynamic bounding box annotations `[ymin, xmin, ymax, xmax]` directly onto analyzed images with interactive zoom/pan controls.
-- 🧠 **Explainable AI (XAI) Diagnostics**: Every anomaly features a *"Why was this detected?"* breakdown explaining underlying edge/texture cues and compliance codes.
-- 🚨 **Automated Risk Severity Rating**: Instant risk classification across **`LOW`**, **`MEDIUM`**, **`HIGH`**, and **`CRITICAL`** hazard tiers.
-- 📊 **Operational Telemetry Dashboard**: Real-time KPI tracking, risk distribution meters, category volume breakdowns, and audit trends.
-- 📋 **Searchable Audit Logs**: Search, filter by severity/domain, sort, and export comprehensive diagnostic reports to PDF.
-- 📱 **Field-Ready Responsive UI**: High-tech, dark-first interface optimized for desktop workstations and mobile site auditors.
-
----
-
-## ⚡ The 5-Stage Autonomous Pipeline
-
-VisionGuard processes every visual target through a structured 5-stage inference workflow:
-
-```mermaid
-graph LR
-    A[01. UPLOAD] --> B[02. ANALYZE]
-    B --> C[03. DETECT]
-    C --> D[04. EXPLAIN]
-    D --> E[05. ACT]
-```
-
-1. **`UPLOAD`**: Ingests high-resolution images (`JPG`, `PNG`, `WEBP`) with in-memory validation and spatial tensor preprocessing.
-2. **`ANALYZE`**: Feeds the image payload into **Google Gemini Vision (`gemini-2.5-flash` / `gemini-1.5-flash`)** models with domain-specific industrial safety prompts.
-3. **`DETECT`**: Isolates bounding regions, tags objects, and determines defect severities with confidence scoring.
-4. **`EXPLAIN`**: Generates explainable root-cause reasoning citing relevant safety standards (OSHA 1926/1910, ISO 45001, ANSI Z358).
-5. **`ACT`**: Outputs a prioritized corrective action plan (`P1 - IMMEDIATE`, `P2 - HIGH`, `P3 - STANDARD`) and audit logs.
-
----
-
-## 🏗️ System Architecture
+Safety supervisors and site managers face the impossible challenge of manually auditing dynamic, hazardous environments across sprawling facilities. **VisionGuard AI** transforms passive camera feeds, mobile photographs, and drone surveillance footage into an automated, closed-loop safety management workflow:
 
 ```
-Vision-Guard-AI/
-├── client/                     # Frontend Application (React 19 + Vite + Tailwind CSS)
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── auth/           # Protected route guards
-│   │   │   ├── common/         # RiskBadge, ConfidenceBar, StatCard, ImageAnnotationViewer
-│   │   │   └── layout/         # AppLayout, Sidebar, Navbar, Footer
-│   │   ├── context/            # AuthContext (JWT session management)
-│   │   ├── pages/              # Landing, Login, Register, Dashboard, Inspect, Results, History, Analytics, Profile, Settings
-│   │   ├── services/           # Axios API clients (authService, inspectionService)
-│   │   ├── App.jsx             # React Router v7 configuration
-│   │   └── index.css           # High-tech design tokens, HUD effects & radar animations
-│   └── package.json
-│
-├── server/                     # Backend API Service (Node.js + Express + Gemini SDK)
-│   ├── src/
-│   │   ├── config/             # Environment, Gemini AI instance, Supabase client
-│   │   ├── controllers/        # authController, inspectionController
-│   │   ├── middlewares/        # JWT authMiddleware, Multer uploadMiddleware, errorHandler
-│   │   ├── routes/             # /api/auth, /api/inspections
-│   │   ├── services/           # aiVisionService, dbService, storageService
-│   │   ├── validations/        # Zod schemas for auth and AI structured responses
-│   │   └── index.js            # Express server entry point
-│   ├── .env.example            # Backend environment template
-│   └── package.json
-│
-├── package.json                # Root package for workspace orchestration
-└── .gitignore                  # Clean repository ignore configuration
+OPTICAL INPUT (Camera / Image / Video)
+        ↓
+COMPUTER VISION INFERENCE (Spatial Bounding & Pose)
+        ↓
+HAZARD & ANOMALY CLASSIFICATION
+        ↓
+DETERMINISTIC MULTI-FACTOR RISK SCORING
+        ↓
+REAL-TIME CRITICAL ALERT (🚨 Web Audio Chime)
+        ↓
+HIGH-RES EVIDENCE CAPTURE
+        ↓
+INCIDENT DISPATCH & CORRECTIVE ACTION
+        ↓
+DATABASE PERSISTENCE & DASHBOARD TELEMETRY
+        ↓
+REGULATORY COMPLIANCE REPORT (OSHA 1926/1910 / ISO 45001)
 ```
 
 ---
 
-## 📡 API Endpoints
+## 2. Problem Statement
 
-### 🔐 Authentication (`/api/auth`)
-| Method | Endpoint | Description | Auth Required |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Register new inspector account | No |
-| `POST` | `/api/auth/login` | Authenticate inspector & return JWT token | No |
-| `GET` | `/api/auth/profile` | Retrieve current authenticated auditor profile | **Yes (Bearer)** |
-| `PUT` | `/api/auth/profile` | Update profile information (name, role, organization) | **Yes (Bearer)** |
-
-### 🔍 Inspections & Diagnostics (`/api/inspections`)
-| Method | Endpoint | Description | Payload / Query |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/inspections/analyze` | Upload image & run Gemini Vision AI analysis | `multipart/form-data` (`image`, `category`, `description`) |
-| `GET` | `/api/inspections` | Query inspection audit history | `?search=...&risk=...&category=...&limit=50` |
-| `GET` | `/api/inspections/:id` | Fetch single diagnostic report by ID | Path parameter `:id` |
-| `DELETE` | `/api/inspections/:id` | Delete an inspection audit record | Path parameter `:id` |
-| `GET` | `/api/inspections/analytics` | Fetch aggregate risk & domain telemetry | Returns metric KPIs & distributions |
+* **Human Visual Fatigue & Blindspots:** Safety officers cannot oversee multiple multi-level work zones simultaneously.
+* **Delayed Incident Response:** Falling object hazards, missing scaffold lock pins, and unlatched harnesses often remain unnoticed until an accident occurs.
+* **Disconnected Systems:** Traditional CCTV systems record video passively without extracting actionable hazard intelligence or dispatching corrective tickets.
 
 ---
 
-## 🚀 Getting Started
+## 3. The Solution
 
-### 📋 Prerequisites
-- **Node.js** (v18.0.0 or higher)
-- **npm** (v9.0.0 or higher)
-- **Google Gemini API Key** ([Get free key here](https://aistudio.google.com/))
-- *(Optional)* Supabase project credentials for cloud PostgreSQL & Storage
+VisionGuard AI provides an **Industrial Safety Operations Platform** integrating:
+1. **Live Camera & CCTV Processing:** Ingests live browser webcams (`navigator.mediaDevices.getUserMedia`) and RTSP streams at 30+ FPS.
+2. **Explainable AI (XAI):** Grounds every detection with visual evidence descriptions, risk explanations, and mapped OSHA/ISO regulatory clauses.
+3. **Operational Incident Lifecycle:** Automatically converts optical detections into actionable incident records assigned to safety personnel with real-time resolution SLAs.
 
 ---
 
-### 📥 1. Clone & Install Dependencies
+## 4. Key Features
 
-```bash
-# Clone the repository
-git clone https://github.com/hassansiddiqueai/Vision-Guard-AI.git
-cd Vision-Guard-AI
+* 🦺 **PPE Compliance Verification:** Automated classification of hard hats (ANSI Z89.1), high-visibility vests (Class 2), gloves, and 100% harness tie-offs.
+* 🏗️ **Structural Scaffolding Diagnostics:** Geometric edge analysis flagging missing diagonal lock pins, displaced baseplates, and open perimeters.
+* 🚜 **Machinery Proximity Alerts:** Real-time spatial corridor tracking calculating worker-to-forklift separation distances.
+* 🚨 **Instant Critical Alerts & Chimes:** Sub-millisecond hazard alert popups with synthesized Web Audio alarm chimes.
+* 📷 **Forensic Evidence Vault:** Timestamped high-resolution visual evidence captures with burned-in spatial telemetry.
+* 📋 **Regulatory Audit Generator:** One-click generation of print-ready and exportable OSHA 1926/1910 compliance reports.
+* 🎯 **Deterministic Demo Simulation Mode:** 6 pre-configured industrial scenarios ensuring seamless hackathon presentations even in offline environments.
 
-# Install Client Dependencies
-cd client
-npm install
+---
 
-# Install Server Dependencies
-cd ../server
-npm install
-cd ..
+## 5. System Architecture
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   CLIENT LAYER (React + Vite)          │
+│  - Live Camera Viewport (getUserMedia)                 │
+│  - Real-time Bounding Box HUD                          │
+│  - Incident Management & Evidence Vault                │
+│  - Centralized State (InspectionContext)               │
+└───────────────────────────┬────────────────────────────┘
+                            │ REST APIs / JSON
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│                   BACKEND LAYER (Node.js + Express)    │
+│  - JWT Authentication & Role-Based Authorization       │
+│  - Rate Limiting, CORS & Input Validation              │
+│  - Multer Image Buffer Preprocessor                    │
+│  - Risk Scoring & Deduplication Engine                 │
+└───────────────┬────────────────────────┬───────────────┘
+                │                        │
+                ▼                        ▼
+┌──────────────────────────────┐ ┌──────────────────────────────┐
+│       AI INFERENCE ENGINE    │ │       DATABASE LAYER         │
+│  - Gemini Vision AI          │ │  - Supabase / PostgreSQL     │
+│  - Structured JSON Mode      │ │  - Relational Schema         │
+│  - Fallback Vision Engine    │ │  - ACID Sync Storage         │
+└──────────────────────────────┘ └──────────────────────────────┘
 ```
 
 ---
 
-### ⚙️ 2. Configure Environment Variables
+## 6. Technology Stack
 
-Create `server/.env` based on `server/.env.example`:
+* **Frontend:** React 19, Vite, Tailwind CSS, Lucide Icons, Web Audio API, React Router v7
+* **Backend:** Node.js, Express.js, Multer, JSON Web Tokens (JWT), Cors
+* **AI & Vision:** Google Gemini Vision (`gemini-2.5-flash`), Custom Edge Vision Anomaly Classifier
+* **Database & Storage:** Supabase / PostgreSQL with synchronized local fallback caching
+* **Security:** Server-side secret encapsulation, parameterized queries, sanitized inputs
 
-```bash
-cd server
-cp .env.example .env
+---
+
+## 7. AI Architecture & Secure Integration
+
+### Zero Frontend Secret Exposure
+The Gemini API key is **never** exposed to client-side bundles or browser requests. All vision calls are proxied through authenticated server endpoints:
+
+```
+Browser (Image Frame) ➔ Backend API (/api/inspections) ➔ Gemini 2.5 Flash ➔ Validated JSON ➔ Client HUD
 ```
 
-Edit `server/.env`:
+### Structured JSON Mode
+Gemini responses are strictly governed by structured schemas:
+
+```json
+{
+  "title": "North Scaffolding Structural Audit",
+  "summary": "Critical diagonal lock pin missing on tier 6 frame.",
+  "risk": "CRITICAL",
+  "confidence": 98.4,
+  "detections": [
+    {
+      "name": "Missing Diagonal Lock Pin",
+      "severity": "CRITICAL",
+      "confidence": 98.4,
+      "location": "Joint Hub Tier 6",
+      "box_2d": [180, 420, 520, 780]
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "P1 - IMMEDIATE",
+      "action": "Halt scaffold elevation work and insert Grade-8 locking pin."
+    }
+  ],
+  "explanation": "Spatial void detected at the primary diagonal intersection."
+}
+```
+
+---
+
+## 8. Role-Based Access Control (RBAC)
+
+| Role | Permissions & Operational Capabilities |
+|---|---|
+| **INSPECTOR** | Start camera scans, upload field imagery, view detection findings |
+| **SAFETY SUPERVISOR** | Receive critical hazard alerts, create incidents, assign corrective actions, mark resolved |
+| **SITE MANAGER** | View site-level safety scores, monitor compliance trends, export regulatory reports |
+| **ADMIN** | Manage system parameters, configure cameras, audit users, reset demo states |
+
+---
+
+## 9. Database Schema
+
+The system uses normalized relational entities:
+
+* `users` (`id`, `email`, `password_hash`, `role`, `organization`, `created_at`)
+* `inspections` (`id`, `user_id`, `site`, `category`, `risk`, `confidence`, `image_url`, `summary`, `created_at`)
+* `detections` (`id`, `inspection_id`, `name`, `severity`, `confidence`, `box_2d`)
+* `incidents` (`id`, `hazard`, `severity`, `risk_score`, `site`, `status`, `assigned_to`, `due_date`, `resolved_at`)
+* `evidence` (`id`, `hazard`, `severity`, `camera`, `location`, `image_url`, `timestamp`)
+* `corrective_actions` (`id`, `incident_id`, `action`, `assigned_to`, `priority`, `status`)
+* `cameras` (`id`, `name`, `site`, `status`, `resolution`, `fps`, `risk`)
+
+---
+
+## 10. API Documentation
+
+### Authentication
+* `POST /api/auth/register` — Register a new safety officer
+* `POST /api/auth/login` — Authenticate and receive JWT Bearer token
+* `GET /api/auth/me` — Retrieve active authenticated session
+
+### Inspections & AI
+* `POST /api/inspections` — Upload image & run Gemini Vision AI diagnostic
+* `GET /api/inspections` — Retrieve paginated inspection records with filters
+* `GET /api/inspections/:id` — Retrieve detailed diagnostic findings
+
+### Incidents & Operations
+* `GET /api/incidents` — Retrieve open/resolved incident tickets
+* `POST /api/incidents` — Create incident ticket from camera detection
+* `PATCH /api/incidents/:id` — Update status (`ASSIGNED`, `RESOLVED`, `OPEN`)
+
+### Evidence & Telemetry
+* `GET /api/evidence` — Retrieve forensic evidence frames
+* `GET /api/dashboard/stats` — Retrieve Site Safety Score, active cameras, and KPIs
+* `GET /api/cameras` — Retrieve live camera wall stream telemetry
+
+---
+
+## 11. Environment Variables
+
+### Server (`server/.env`)
 ```env
 PORT=5000
 NODE_ENV=development
 CLIENT_URL=http://localhost:5173
-
-# JWT Secret
-JWT_SECRET=your_super_secret_jwt_key_2026
-
-# Google Gemini API Key
+JWT_SECRET=your_jwt_secret_key_here
 GEMINI_API_KEY=your_gemini_api_key_here
-
-# Supabase Credentials (Optional - Local fallback active by default)
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_KEY=your_supabase_key_here
 ```
 
----
-
-### 🏃 3. Run Locally
-
-From the root directory, you can start both client and server:
-
-#### Terminal 1 — Start Backend Server:
-```bash
-npm run dev:server
-# Server running at http://localhost:5000 (Health Check: http://localhost:5000/api/health)
-```
-
-#### Terminal 2 — Start Frontend Client:
-```bash
-npm run dev:client
-# Client running at http://localhost:5173
+### Client (`client/.env`)
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
 ```
 
 ---
 
-## 🔒 Security & Data Privacy
+## 12. Local Setup & Installation
 
-- 🔑 **Zero Client-Side Key Exposure**: The Google Gemini API key resides solely inside backend environment variables.
-- 🛡️ **In-Memory Buffer Streaming**: Uploaded image payloads are ingested via in-memory buffers to avoid unencrypted disk staging.
-- 🔏 **JWT Authorization**: 256-bit encrypted Bearer tokens for all protected inspector operations.
-- 🔒 **Data Sanitization**: Strict input and output validation powered by **Zod** across every layer.
+### Prerequisites
+* Node.js v18.0.0+
+* npm v9.0.0+
+
+### 1. Clone & Install
+```bash
+# Clone the repository
+git clone https://github.com/your-username/Vision-Guard-AI.git
+cd Vision-Guard-AI
+
+# Install backend dependencies
+cd server
+npm install
+
+# Install frontend dependencies
+cd ../client
+npm install
+```
+
+### 2. Configure Environment
+```bash
+# In server directory
+cp .env.example .env
+# Add your GEMINI_API_KEY
+
+# In client directory
+cp .env.example .env
+```
+
+### 3. Run Development Servers
+```bash
+# Start Backend API (Port 5000)
+cd server
+npm run dev
+
+# In a separate terminal, start Frontend (Port 5173)
+cd client
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-## 👥 Authors & Acknowledgements
+## 13. Hackathon Live Demo Instructions
 
-- **VisionGuard AI Team** — Built for the AI & Computer Vision Hackathon.
-- Powered by **Google Gemini Vision API** and **Supabase**.
+1. Navigate to **Dashboard (`/dashboard`)** to review the live **Site Safety Score** (`86/100`) and active CCTV status.
+2. Open **Live Monitoring (`/live-monitoring`)** and click **Connect Camera** to stream your actual webcam with real-time bounding boxes.
+3. Test scenario triggers using the **Demo Scenarios** bar (`[ PPE Violation ]`, `[ Restricted Zone ]`, `[ Machinery Risk ]`, `[ Fall Detection ]`).
+4. Experience the **CRITICAL SAFETY ALERT** popup with synthesized audio alarms.
+5. Click **Capture Evidence** and **Create Incident** to generate a ticket.
+6. Navigate to **Incidents (`/incidents`)** to reassign or mark the incident resolved.
+7. Open **Reports (`/reports`)** to preview, print, or download the regulatory audit sheet.
 
 ---
 
-<div align="center">
-  <sub>Built with ❤️ for industrial safety, workplace hazard prevention, and zero-accident job sites.</sub>
-</div>
+## 14. License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

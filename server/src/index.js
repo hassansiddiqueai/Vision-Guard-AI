@@ -6,12 +6,13 @@ const errorHandler = require('./middlewares/errorHandler');
 
 const authRoutes = require('./routes/authRoutes');
 const inspectionRoutes = require('./routes/inspectionRoutes');
+const apiRoutes = require('./routes/apiRoutes');
 
 const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: env.CLIENT_URL,
+  origin: env.CLIENT_URL || '*',
   credentials: true,
 }));
 
@@ -34,6 +35,7 @@ app.get('/api/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/inspections', inspectionRoutes);
+app.use('/api', apiRoutes);
 
 // Error Handling Middleware (must be registered last)
 app.use(errorHandler);
