@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { inspectionService } from '../services/inspectionService';
+import { calculateSiteSafetyScore, soundEngine } from '../services/riskEngine';
 
 const InspectionContext = createContext(null);
 
-// Initial industrial inspection seed dataset
 const SEED_INSPECTIONS = [
   {
     id: 'INS-0241',
@@ -118,8 +118,7 @@ const SEED_INSPECTIONS = [
       }
     ],
     recommendations: [
-      { priority: 'P1 - HIGH', action: 'Lock out machine and bolt fixed yellow safety enclosure.', reason: 'Rotating component entrapment hazard.' },
-      { priority: 'P2 - MEDIUM', action: 'Wipe cylinder rod and monitor weep rate during trial cycle.', reason: 'Quantify seal degradation rate.' }
+      { priority: 'P1 - HIGH', action: 'Lock out machine and bolt fixed yellow safety enclosure.', reason: 'Rotating component entrapment hazard.' }
     ],
     notesList: [
       { id: 1, author: 'David Miller', text: 'Unit placed in lockout status pending guard installation.', date: '2026-09-30 14:30' }
@@ -205,6 +204,137 @@ const SEED_INSPECTIONS = [
   }
 ];
 
+const SEED_INCIDENTS = [
+  {
+    id: 'INC-104',
+    hazard: 'Missing Diagonal Scaffolding Pin',
+    severity: 'CRITICAL',
+    riskScore: 98,
+    site: 'Apex Tower — Zone B',
+    location: 'Tier 6 Scaffolding Platform',
+    detectedAt: '2026-10-01 08:32',
+    status: 'ASSIGNED',
+    assignedTo: 'Marcus Vance (Site Safety Lead)',
+    evidenceImage: 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=600&auto=format&fit=crop',
+    correctiveAction: 'Halt scaffold work and bolt locking pin.',
+    dueDate: '2026-10-01 10:00',
+  },
+  {
+    id: 'INC-103',
+    hazard: 'Exposed Machine Pulley Assembly',
+    severity: 'HIGH',
+    riskScore: 88,
+    site: 'Harbor Gateway Extension',
+    location: 'Excavator Yard 3',
+    detectedAt: '2026-09-30 14:18',
+    status: 'IN PROGRESS',
+    assignedTo: 'Dave Miller (Fleet Lead)',
+    evidenceImage: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=600&auto=format&fit=crop',
+    correctiveAction: 'Lockout equipment and install barrier.',
+    dueDate: '2026-09-30 18:00',
+  },
+  {
+    id: 'INC-102',
+    hazard: 'Uncapped Vertical Rebar Dowels',
+    severity: 'CRITICAL',
+    riskScore: 95,
+    site: 'Eastside Medical Center',
+    location: 'Sub-grade Basement Trench',
+    detectedAt: '2026-09-30 10:05',
+    status: 'RESOLVED',
+    assignedTo: 'Foundation Subcontractor',
+    evidenceImage: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=600&auto=format&fit=crop',
+    correctiveAction: 'Safety mushroom caps installed on all 14 dowels.',
+    dueDate: '2026-09-30 12:00',
+    resolvedAt: '2026-09-30 11:15',
+  },
+  {
+    id: 'INC-101',
+    hazard: 'Switchgear Panel Egress Obstruction',
+    severity: 'MEDIUM',
+    riskScore: 65,
+    site: 'Industrial Park Substation 4',
+    location: '480V Distribution Bay',
+    detectedAt: '2026-09-29 16:22',
+    status: 'RESOLVED',
+    assignedTo: 'Facility Logistics Team',
+    evidenceImage: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=600&auto=format&fit=crop',
+    correctiveAction: 'Pallet removed to storage aisle 4.',
+    dueDate: '2026-09-29 18:00',
+    resolvedAt: '2026-09-29 17:00',
+  }
+];
+
+const SEED_EVIDENCE = [
+  {
+    id: 'EVD-001',
+    hazard: 'Missing Diagonal Lock Pin',
+    severity: 'CRITICAL',
+    confidence: 98.4,
+    camera: 'CAM-01 (Apex Tower)',
+    location: 'Sector 4B Platform',
+    timestamp: '2026-10-01 08:32:15',
+    imageUrl: 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=600&auto=format&fit=crop',
+  },
+  {
+    id: 'EVD-002',
+    hazard: 'Exposed Rotating Pulley Drive',
+    severity: 'HIGH',
+    confidence: 96.0,
+    camera: 'CAM-02 (Yard Dock)',
+    location: 'CAT 336 Boom',
+    timestamp: '2026-09-30 14:18:22',
+    imageUrl: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=600&auto=format&fit=crop',
+  },
+  {
+    id: 'EVD-003',
+    hazard: 'Uncapped Steel Rebar Dowels',
+    severity: 'CRITICAL',
+    confidence: 97.9,
+    camera: 'CAM-03 (Foundation Pour)',
+    location: 'Basement Trench Sector 2',
+    timestamp: '2026-09-30 10:05:40',
+    imageUrl: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=600&auto=format&fit=crop',
+  }
+];
+
+const SEED_NOTIFICATIONS = [
+  {
+    id: 'NOTIF-1',
+    type: 'CRITICAL',
+    title: 'Critical Safety Alert: Missing Scaffold Pin',
+    message: 'Visual anomaly detected on Apex Tower Zone B tier 6 scaffold frame.',
+    timestamp: '12m ago',
+    read: false,
+    link: '/inspections/INS-0241',
+  },
+  {
+    id: 'NOTIF-2',
+    type: 'HIGH',
+    title: 'High Risk Hazard: Exposed Machine Pulley',
+    message: 'Unguarded belt assembly detected in Heavy Equipment Yard.',
+    timestamp: '45m ago',
+    read: false,
+    link: '/inspections/INS-0240',
+  },
+  {
+    id: 'NOTIF-3',
+    type: 'RESOLVED',
+    title: 'Corrective Action Completed',
+    message: 'OSHA safety caps installed on rebar dowels at Eastside Medical.',
+    timestamp: '2h ago',
+    read: true,
+    link: '/incidents',
+  }
+];
+
+const SEED_CAMERAS = [
+  { id: 'CAM-001', name: 'North Scaffolding Matrix', site: 'Apex Tower — Zone B', status: 'ONLINE', resolution: '1440p (2K)', fps: 30, risk: 'CRITICAL' },
+  { id: 'CAM-002', name: 'Heavy Equipment Staging', site: 'Harbor Gateway Extension', status: 'ONLINE', resolution: '1080p', fps: 25, risk: 'HIGH' },
+  { id: 'CAM-003', name: 'Basement Concrete Pour', site: 'Eastside Medical Center', status: 'ONLINE', resolution: '1440p', fps: 30, risk: 'SAFE' },
+  { id: 'CAM-004', name: 'Substation Electrical Bay', site: 'Industrial Park Substation 4', status: 'ONLINE', resolution: '1080p', fps: 20, risk: 'SAFE' },
+];
+
 export const InspectionProvider = ({ children }) => {
   const [inspections, setInspections] = useState(() => {
     const saved = localStorage.getItem('vg_inspections_store');
@@ -212,150 +342,187 @@ export const InspectionProvider = ({ children }) => {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {
-        console.warn('Failed parsing saved inspections', e);
-      }
+      } catch (e) {}
     }
-    localStorage.setItem('vg_inspections_store', JSON.stringify(SEED_INSPECTIONS));
     return SEED_INSPECTIONS;
   });
 
-  const [loading, setLoading] = useState(false);
-  const [activeInspectionId, setActiveInspectionId] = useState(null);
-
-  // Sync with backend API if online
-  useEffect(() => {
-    const syncBackend = async () => {
+  const [incidents, setIncidents] = useState(() => {
+    const saved = localStorage.getItem('vg_incidents_store');
+    if (saved) {
       try {
-        const data = await inspectionService.getInspections();
-        if (Array.isArray(data) && data.length > 0) {
-          // Merge backend records with existing store
-          setInspections((prev) => {
-            const map = new Map();
-            prev.forEach((item) => map.set(item.id, item));
-            data.forEach((item) => {
-              // Convert backend schema to unified inspection model
-              const unified = {
-                id: item.id || `INS-${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
-                name: item.title || item.name || 'Site Inspection Scan',
-                site: item.site || 'Main Project Site',
-                type: item.category || item.type || 'General Safety',
-                inspector: item.inspector || 'Safety Auditor',
-                location: item.location || 'Facility Work Zone',
-                notes: item.description || item.notes || '',
-                createdAt: item.createdAt || new Date().toISOString(),
-                status: item.status || 'Completed',
-                riskLevel: (item.risk || item.riskLevel || 'LOW').toUpperCase(),
-                overallConfidence: item.confidence || item.overallConfidence || 95,
-                fileName: item.fileName || 'inspection_target.jpg',
-                fileSize: item.fileSize || '2.5 MB',
-                imageUrl: item.imageUrl || '',
-                summary: item.summary || '',
-                explanation: item.explanation || '',
-                findings: (item.findings || item.anomalies || []).map((f, idx) => ({
-                  id: f.id || `F-${idx + 1}`,
-                  label: f.label || f.title || f.name || 'Visual Anomaly',
-                  severity: (f.severity || 'HIGH').toUpperCase(),
-                  confidence: f.confidence || 90,
-                  box_2d: f.box_2d || null,
-                  status: f.status || 'Open',
-                  evidence: f.evidence || '',
-                  riskFactor: f.description || f.riskFactor || '',
-                  complianceRef: f.complianceRef || 'Applicable safety standard',
-                  correctiveAction: f.correctiveAction || (item.recommendations?.[idx]?.action) || 'Inspect and remediate hazard.',
-                  assignedTo: f.assignedTo || null,
-                })),
-                recommendations: item.recommendations || [],
-                notesList: item.notesList || []
-              };
-              map.set(unified.id, unified);
-            });
-            const merged = Array.from(map.values());
-            localStorage.setItem('vg_inspections_store', JSON.stringify(merged));
-            return merged;
-          });
-        }
-      } catch (err) {
-        console.info('Using localized inspection telemetry database');
-      }
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return SEED_INCIDENTS;
+  });
+
+  const [evidenceList, setEvidenceList] = useState(() => {
+    const saved = localStorage.getItem('vg_evidence_store');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return SEED_EVIDENCE;
+  });
+
+  const [notifications, setNotifications] = useState(SEED_NOTIFICATIONS);
+  const [cameras, setCameras] = useState(SEED_CAMERAS);
+  const [activeAlert, setActiveAlert] = useState(null);
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
+
+  // Sync state changes to localStorage
+  useEffect(() => {
+    localStorage.setItem('vg_inspections_store', JSON.stringify(inspections));
+  }, [inspections]);
+
+  useEffect(() => {
+    localStorage.setItem('vg_incidents_store', JSON.stringify(incidents));
+  }, [incidents]);
+
+  useEffect(() => {
+    localStorage.setItem('vg_evidence_store', JSON.stringify(evidenceList));
+  }, [evidenceList]);
+
+  // Alert trigger with audio chime
+  const triggerHazardAlert = (alertData) => {
+    setActiveAlert(alertData);
+    if (alertData.severity === 'CRITICAL') {
+      soundEngine.playCriticalAlert();
+    } else {
+      soundEngine.playWarningChime();
+    }
+
+    // Add to notifications log
+    const newNotif = {
+      id: `NOTIF-${Date.now()}`,
+      type: alertData.severity || 'HIGH',
+      title: `${alertData.severity} Hazard: ${alertData.title || alertData.hazard}`,
+      message: alertData.description || 'Hazard detected via real-time computer vision monitoring.',
+      timestamp: 'Just now',
+      read: false,
+      link: alertData.inspectionId ? `/inspections/${alertData.inspectionId}` : '/live-monitoring',
     };
+    setNotifications((prev) => [newNotif, ...prev]);
+  };
 
-    syncBackend();
-  }, []);
-
-  // Update store helper
-  const saveStore = (updatedList) => {
-    setInspections(updatedList);
-    localStorage.setItem('vg_inspections_store', JSON.stringify(updatedList));
+  const dismissActiveAlert = () => {
+    setActiveAlert(null);
   };
 
   // Add new inspection
   const addInspection = (newInspection) => {
-    const updated = [newInspection, ...inspections];
-    saveStore(updated);
+    setInspections((prev) => [newInspection, ...prev]);
     return newInspection;
   };
 
-  // Get inspection by ID
   const getInspection = (id) => {
     return inspections.find((item) => item.id === id) || inspections[0] || null;
   };
 
-  // Delete inspection
   const deleteInspection = async (id) => {
     try {
       await inspectionService.deleteInspection(id);
     } catch {}
-    const updated = inspections.filter((item) => item.id !== id);
-    saveStore(updated);
+    setInspections((prev) => prev.filter((item) => item.id !== id));
   };
 
-  // Toggle Finding Status (Open / In Progress / Resolved)
   const updateFindingStatus = (inspectionId, findingId, newStatus) => {
-    const updated = inspections.map((insp) => {
-      if (insp.id !== inspectionId) return insp;
-      const updatedFindings = (insp.findings || []).map((f) => {
-        if (f.id === findingId) {
-          return { ...f, status: newStatus };
+    setInspections((prev) =>
+      prev.map((insp) => {
+        if (insp.id !== inspectionId) return insp;
+        const updatedFindings = (insp.findings || []).map((f) => {
+          if (f.id === findingId) {
+            return { ...f, status: newStatus };
+          }
+          return f;
+        });
+        return { ...insp, findings: updatedFindings };
+      })
+    );
+  };
+
+  // Incident methods
+  const addIncident = (incidentData) => {
+    const newInc = {
+      id: `INC-${Math.floor(100 + Math.random() * 900)}`,
+      detectedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
+      status: 'OPEN',
+      assignedTo: 'Site Safety Supervisor',
+      ...incidentData,
+    };
+    setIncidents((prev) => [newInc, ...prev]);
+    return newInc;
+  };
+
+  const updateIncidentStatus = (incidentId, newStatus) => {
+    setIncidents((prev) =>
+      prev.map((inc) => {
+        if (inc.id === incidentId) {
+          return {
+            ...inc,
+            status: newStatus,
+            resolvedAt: newStatus === 'RESOLVED' ? new Date().toISOString().replace('T', ' ').slice(0, 16) : inc.resolvedAt,
+          };
         }
-        return f;
-      });
-      return { ...insp, findings: updatedFindings };
-    });
-    saveStore(updated);
+        return inc;
+      })
+    );
   };
 
-  // Assign Finding to personnel
-  const assignFinding = (inspectionId, findingId, assignee) => {
-    const updated = inspections.map((insp) => {
-      if (insp.id !== inspectionId) return insp;
-      const updatedFindings = (insp.findings || []).map((f) => {
-        if (f.id === findingId) {
-          return { ...f, assignedTo: assignee };
+  const assignIncident = (incidentId, assignee) => {
+    setIncidents((prev) =>
+      prev.map((inc) => {
+        if (inc.id === incidentId) {
+          return { ...inc, assignedTo: assignee, status: inc.status === 'OPEN' ? 'ASSIGNED' : inc.status };
         }
-        return f;
-      });
-      return { ...insp, findings: updatedFindings };
-    });
-    saveStore(updated);
+        return inc;
+      })
+    );
   };
 
-  // Add inspection note
-  const addNote = (inspectionId, text, author = 'Inspector') => {
-    const updated = inspections.map((insp) => {
-      if (insp.id !== inspectionId) return insp;
-      const newNote = {
-        id: Date.now(),
-        author,
-        text,
-        date: new Date().toISOString().replace('T', ' ').slice(0, 16),
-      };
-      return { ...insp, notesList: [...(insp.notesList || []), newNote] };
-    });
-    saveStore(updated);
+  // Evidence methods
+  const addEvidence = (evidenceData) => {
+    const newEvd = {
+      id: `EVD-${Math.floor(100 + Math.random() * 900)}`,
+      timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
+      ...evidenceData,
+    };
+    setEvidenceList((prev) => [newEvd, ...prev]);
+    return newEvd;
   };
 
-  // Compute aggregate stats for Dashboard and Analytics
+  const deleteEvidence = (id) => {
+    setEvidenceList((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  // Notification methods
+  const markNotificationRead = (id) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  };
+
+  const clearNotifications = () => {
+    setNotifications([]);
+  };
+
+  // Reset demo state
+  const resetDemo = () => {
+    setInspections(SEED_INSPECTIONS);
+    setIncidents(SEED_INCIDENTS);
+    setEvidenceList(SEED_EVIDENCE);
+    setNotifications(SEED_NOTIFICATIONS);
+    localStorage.setItem('vg_inspections_store', JSON.stringify(SEED_INSPECTIONS));
+    localStorage.setItem('vg_incidents_store', JSON.stringify(SEED_INCIDENTS));
+    localStorage.setItem('vg_evidence_store', JSON.stringify(SEED_EVIDENCE));
+    setActiveAlert(null);
+  };
+
+  // Compute aggregate stats
   const getStats = () => {
     const total = inspections.length;
     let criticalHazards = 0;
@@ -393,6 +560,14 @@ export const InspectionProvider = ({ children }) => {
       });
     });
 
+    const ppeComplianceRate = 92.4;
+    const siteSafetyScore = calculateSiteSafetyScore({
+      ppeComplianceRate,
+      criticalHazards,
+      openIncidents: incidents.filter((i) => i.status !== 'RESOLVED').length,
+      resolvedIncidents: incidents.filter((i) => i.status === 'RESOLVED').length,
+    });
+
     const complianceRate = totalIssues > 0
       ? ((resolvedIssues / totalIssues) * 100).toFixed(1)
       : '98.5';
@@ -402,9 +577,13 @@ export const InspectionProvider = ({ children }) => {
       criticalHazards,
       openIssues,
       complianceRate: `${complianceRate}%`,
+      ppeComplianceRate: `${ppeComplianceRate}%`,
+      siteSafetyScore,
       avgConfidence: total > 0 ? (totalConfidence / total).toFixed(1) : '96.2',
       riskCounts,
       allHazards,
+      activeIncidentsCount: incidents.filter((i) => i.status !== 'RESOLVED').length,
+      activeCamerasCount: cameras.filter((c) => c.status === 'ONLINE').length,
     };
   };
 
@@ -412,13 +591,27 @@ export const InspectionProvider = ({ children }) => {
     <InspectionContext.Provider
       value={{
         inspections,
-        loading,
+        incidents,
+        evidenceList,
+        notifications,
+        cameras,
+        activeAlert,
+        isAudioMuted,
+        setIsAudioMuted,
+        triggerHazardAlert,
+        dismissActiveAlert,
         getInspection,
         addInspection,
         deleteInspection,
         updateFindingStatus,
-        assignFinding,
-        addNote,
+        addIncident,
+        updateIncidentStatus,
+        assignIncident,
+        addEvidence,
+        deleteEvidence,
+        markNotificationRead,
+        clearNotifications,
+        resetDemo,
         getStats,
       }}
     >

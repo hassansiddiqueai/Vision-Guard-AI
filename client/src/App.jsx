@@ -5,10 +5,13 @@ import { InspectionProvider } from './context/InspectionContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AppLayout } from './components/layout/AppLayout';
 
-// Public Pages
+// Public Marketing & Demo Pages
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { HowItWorksPage } from './pages/HowItWorksPage';
+import { CapabilitiesPage } from './pages/CapabilitiesPage';
+import { LiveDemoPage } from './pages/LiveDemoPage';
 
 // Control Center Application Pages
 import { DashboardPage } from './pages/DashboardPage';
@@ -16,6 +19,9 @@ import { InspectionsListPage } from './pages/InspectionsListPage';
 import { NewInspectionPage } from './pages/NewInspectionPage';
 import { InspectionResultsPage } from './pages/InspectionResultsPage';
 import { LiveMonitoringPage } from './pages/LiveMonitoringPage';
+import { InspectionEnginePage } from './pages/InspectionEnginePage';
+import { IncidentsPage } from './pages/IncidentsPage';
+import { EvidenceGalleryPage } from './pages/EvidenceGalleryPage';
 import { HazardsPage } from './pages/HazardsPage';
 import { CompliancePage } from './pages/CompliancePage';
 import { ReportsPage } from './pages/ReportsPage';
@@ -29,10 +35,13 @@ function App() {
       <InspectionProvider>
         <BrowserRouter>
           <Routes>
-            {/* Public Routes */}
+            {/* Public Interactive Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/capabilities" element={<CapabilitiesPage />} />
+            <Route path="/live-demo" element={<LiveDemoPage />} />
 
             {/* Protected Control Center Shell Routes */}
             <Route
@@ -44,10 +53,14 @@ function App() {
             >
               {/* Primary Routes */}
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/live-monitoring" element={<LiveMonitoringPage />} />
+              <Route path="/monitoring" element={<LiveMonitoringPage />} />
+              <Route path="/inspection-engine" element={<InspectionEnginePage />} />
               <Route path="/inspections" element={<InspectionsListPage />} />
               <Route path="/inspections/new" element={<NewInspectionPage />} />
               <Route path="/inspections/:id" element={<InspectionResultsPage />} />
-              <Route path="/monitoring" element={<LiveMonitoringPage />} />
+              <Route path="/incidents" element={<IncidentsPage />} />
+              <Route path="/evidence" element={<EvidenceGalleryPage />} />
               <Route path="/hazards" element={<HazardsPage />} />
               <Route path="/compliance" element={<CompliancePage />} />
               <Route path="/reports" element={<ReportsPage />} />
