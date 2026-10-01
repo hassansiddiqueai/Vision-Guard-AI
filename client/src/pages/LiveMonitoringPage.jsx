@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Camera,
@@ -25,11 +25,14 @@ import {
   AlertCircle,
   Video,
   Server,
-  Zap
+  Zap,
+  Upload,
+  ArrowRight
 } from 'lucide-react';
 import { useInspections } from '../context/InspectionContext';
 import { RiskBadge } from '../components/common/RiskBadge';
 import { IncidentModal } from '../components/common/IncidentModal';
+import { CameraStreamPlayer } from '../components/camera/CameraStreamPlayer';
 
 export const LiveMonitoringPage = () => {
   const [searchParams] = useSearchParams();
@@ -49,10 +52,8 @@ export const LiveMonitoringPage = () => {
     searchParams.get('camera') || 'CAM-001'
   );
   const [viewMode, setViewMode] = useState('DETAIL'); // 'GRID' | 'DETAIL'
-  const [isPlaying, setIsPlaying] = useState(true);
   const [showZones, setShowZones] = useState(true);
   const [showBoxes, setShowBoxes] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [showAddCameraModal, setShowAddCameraModal] = useState(false);
 
@@ -60,15 +61,18 @@ export const LiveMonitoringPage = () => {
   const [newCamera, setNewCamera] = useState({
     name: '',
     site: sites[0]?.name || 'Apex Tower Project',
-    type: 'RTSP Stream',
+    type: 'Demo Video', // 'Webcam' | 'Upload Video' | 'Demo Video' | 'HLS/WebRTC' | 'RTSP Stream'
     rtspUrl: 'rtsp://192.168.1.120:554/live/ch0',
     username: 'admin',
     password: '••••••••',
     location: 'Tower Perimeter Level 4',
     resolution: '1080p (FHD)',
+    uploadedFileUrl: null,
   });
+
   const [isTestingConn, setIsTestingConn] = useState(false);
   const [testResult, setTestResult] = useState(null);
+  const fileInputRef = useRef(null);
 
   // Sync selected camera from URL query if present
   useEffect(() => {
@@ -89,15 +93,6 @@ export const LiveMonitoringPage = () => {
     visibleCameras[0] ||
     cameras[0];
 
-  // Simulated live clock
-  const [liveClock, setLiveClock] = useState(new Date().toLocaleTimeString('en-US', { hour12: false }));
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setLiveClock(new Date().toLocaleTimeString('en-US', { hour12: false }));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   const handleTestConnection = async () => {
     setIsTestingConn(true);
     setTestResult(null);
@@ -106,23 +101,44 @@ export const LiveMonitoringPage = () => {
     setTestResult(res);
   };
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setNewCamera((prev) => ({
+        ...prev,
+        uploadedFileUrl: url,
+        name: prev.name || file.name.replace(/\.[^/.]+$/, ''),
+      }));
+      setTestResult({
+        success: true,
+        message: `Video file "${file.name}" loaded (${(file.size / (1024 * 1024)).toFixed(1)} MB). Ready for real-time computer vision analysis.`,
+      });
+    }
+  };
+
   const handleAddCameraSubmit = (e) => {
     e.preventDefault();
+    let feedUrl = 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=1200&auto=format&fit=crop';
+    if (newCamera.type === 'Webcam') {
+      feedUrl = 'WEBCAM';
+    } else if (newCamera.type === 'Upload Video' && newCamera.uploadedFileUrl) {
+      feedUrl = newCamera.uploadedFileUrl;
+    }
+
     const created = addCamera({
       name: newCamera.name || `CCTV Stream ${newCamera.location}`,
       site: newCamera.site,
       location: newCamera.location,
       type: newCamera.type,
       resolution: newCamera.resolution,
-      feedUrl: newCamera.type === 'Webcam' ? 'WEBCAM' : 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=1200&auto=format&fit=crop',
+      feedUrl: feedUrl,
+      videoUrl: newCamera.uploadedFileUrl || null,
     });
+
     setShowAddCameraModal(false);
     setSelectedCameraId(created.id);
     setViewMode('DETAIL');
-  };
-
-  const handleSnapshot = () => {
-    alert(`[CAMERA SNAPSHOT CAPTURED] High-res frame recorded for ${activeCamera.id} (${activeCamera.name}) with timestamp ${liveClock}. Saved to Evidence Vault.`);
   };
 
   const activeCamIncident = incidents.find(
@@ -171,7 +187,10 @@ export const LiveMonitoringPage = () => {
 
           {/* Add Camera Button */}
           <button
-            onClick={() => setShowAddCameraModal(true)}
+            onClick={() => {
+              setTestResult(null);
+              setShowAddCameraModal(true);
+            }}
             className="vg-btn-primary text-xs flex items-center gap-1.5"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -180,7 +199,7 @@ export const LiveMonitoringPage = () => {
         </div>
       </div>
 
-      {/* 4-COLUMN RESPONSIVE GRID VIEW */}
+      {/* 4-COLUMN RESPONSIVE GRID VIEW (Requirement 4) */}
       {viewMode === 'GRID' && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -202,68 +221,31 @@ export const LiveMonitoringPage = () => {
                     setViewMode('DETAIL');
                   }}
                 >
-                  {/* Top Meta Bar */}
-                  <div className="px-3 py-1.5 bg-slate-900 text-white flex items-center justify-between text-[11px] font-mono">
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="font-bold text-emerald-300">LIVE</span>
-                      <span className="text-slate-400">&bull;</span>
-                      <span className="font-bold text-white">{cam.id}</span>
-                    </div>
-                    <span className="text-slate-400 text-[10px]">{cam.fps} FPS</span>
-                  </div>
-
-                  {/* Video Viewport */}
-                  <div className="relative aspect-video bg-slate-950 overflow-hidden">
-                    <img
-                      src={cam.feedUrl || 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=800&auto=format&fit=crop'}
-                      alt={cam.name}
-                      className="w-full h-full object-cover"
-                    />
-
-                    {/* Detection Overlays */}
-                    {cam.currentRisk === 'CRITICAL' || cam.currentRisk === 'HIGH' ? (
-                      <div className="absolute inset-0 pointer-events-none p-2">
-                        <div className="border border-red-500 bg-red-500/15 rounded absolute left-[20%] top-[15%] w-[45%] h-[60%] flex flex-col justify-between p-1">
-                          <span className="bg-red-600 text-white font-mono font-bold text-[8px] px-1 py-0.5 rounded self-start">
-                            PERSON &bull; NO HELMET 94%
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="absolute inset-0 pointer-events-none p-2">
-                        <div className="border border-emerald-500 bg-emerald-500/10 rounded absolute left-[25%] top-[20%] w-[35%] h-[55%] flex flex-col justify-between p-1">
-                          <span className="bg-emerald-700 text-white font-mono font-bold text-[8px] px-1 py-0.5 rounded self-start">
-                            PERSON &bull; PPE COMPLIANT 98%
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="absolute top-2 right-2">
-                      <RiskBadge level={cam.currentRisk} size="sm" />
-                    </div>
-
-                    <div className="absolute bottom-1 left-2 right-2 flex items-center justify-between text-[10px] font-mono text-slate-300 bg-slate-950/80 px-2 py-0.5 rounded">
-                      <span className="truncate">{cam.siteCode || 'SITE'}</span>
-                      <span className="text-emerald-400 font-bold">ONLINE</span>
-                    </div>
-                  </div>
+                  {/* Working Stream Player */}
+                  <CameraStreamPlayer
+                    camera={cam}
+                    isDetailed={false}
+                    showOverlays={true}
+                    showZones={false}
+                    matchingIncident={matchingIncident}
+                  />
 
                   {/* Card Info & Bottom Stats */}
                   <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
                     <div>
                       <h3 className="font-bold text-xs text-slate-900 truncate">{cam.name}</h3>
-                      <p className="text-[11px] text-slate-500 truncate">{cam.site}</p>
+                      <p className="text-[11px] text-slate-500 truncate">{cam.site} &bull; {cam.location}</p>
                     </div>
 
                     <div className="p-2 rounded bg-slate-50 border border-slate-200 text-[10px] font-mono text-slate-700 space-y-0.5">
                       <div className="flex justify-between">
-                        <span>7 people detected</span>
+                        <span>Detected:</span>
+                        <strong className="text-slate-900">7 workers</strong>
                       </div>
                       <div className="flex justify-between text-slate-600">
-                        <span>
-                          {cam.currentRisk === 'CRITICAL' ? '5 PPE compliant, 1 violation' : '7 PPE compliant'}
+                        <span>PPE Status:</span>
+                        <span className="text-emerald-700 font-semibold">
+                          {cam.currentRisk === 'CRITICAL' ? '5 compliant, 1 violation' : '7 fully compliant'}
                         </span>
                       </div>
                     </div>
@@ -287,7 +269,7 @@ export const LiveMonitoringPage = () => {
                           }}
                           className="py-1 px-2 rounded bg-red-50 hover:bg-red-100 text-red-700 text-[11px] font-bold border border-red-200 transition"
                         >
-                          VIEW INCIDENT
+                          INCIDENT
                         </button>
                       )}
                     </div>
@@ -299,171 +281,51 @@ export const LiveMonitoringPage = () => {
         </div>
       )}
 
-      {/* FOCUS INSPECTION & CAMERA DETAIL VIEW */}
+      {/* FOCUS INSPECTION & CAMERA DETAIL VIEW (Requirement 9) */}
       {viewMode === 'DETAIL' && activeCamera && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Live Stream Viewport (2 Columns) */}
-          <div className={`lg:col-span-2 vg-card overflow-hidden flex flex-col ${
-            isFullscreen ? 'fixed inset-0 z-50 rounded-none bg-black' : ''
-          }`}>
-            {/* Stream Top Control Header */}
-            <div className="bg-slate-900 px-4 py-2.5 flex items-center justify-between text-white text-xs border-b border-slate-800">
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1.5 text-emerald-400 font-mono font-bold">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> LIVE
-                </span>
-                <span className="font-bold text-white text-sm">{activeCamera.id}</span>
-                <span className="text-slate-300 truncate max-w-[200px]">{activeCamera.name}</span>
-                <span className="text-slate-400 text-[11px] font-mono">&bull; {activeCamera.site}</span>
-              </div>
-
-              <div className="flex items-center gap-2 font-mono">
-                <span className="text-slate-400 text-xs hidden sm:inline">{liveClock}</span>
-                <RiskBadge level={activeCamera.currentRisk} size="sm" />
-                <button
-                  onClick={() => setIsFullscreen(!isFullscreen)}
-                  className="p-1 rounded text-slate-400 hover:text-white transition"
-                  title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-                >
-                  {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Live Video Frame with Detection Overlays */}
-            <div className="relative aspect-video bg-slate-950 flex items-center justify-center overflow-hidden select-none">
-              <img
-                src={activeCamera.feedUrl || 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=1200&auto=format&fit=crop'}
-                alt={activeCamera.name}
-                className={`w-full h-full object-cover transition-opacity ${isPlaying ? 'opacity-100' : 'opacity-70'}`}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="vg-card overflow-hidden">
+              {/* Working Camera Player with Controls */}
+              <CameraStreamPlayer
+                camera={activeCamera}
+                isDetailed={true}
+                showOverlays={showBoxes}
+                showZones={showZones}
+                matchingIncident={activeCamIncident}
               />
-
-              {/* Overlaid Virtual Zones */}
-              {showZones && activeCamera.zones && (
-                <div className="absolute inset-0 pointer-events-none">
-                  {activeCamera.zones.map((zone, idx) => (
-                    <div
-                      key={zone.id}
-                      className="absolute border-2 border-dashed border-red-500 bg-red-500/10 rounded p-1.5"
-                      style={{
-                        top: idx === 0 ? '15%' : '45%',
-                        left: idx === 0 ? '18%' : '52%',
-                        width: idx === 0 ? '38%' : '40%',
-                        height: idx === 0 ? '55%' : '45%',
-                      }}
-                    >
-                      <span className="bg-red-600 text-white font-mono font-bold text-[9px] px-1.5 py-0.5 rounded">
-                        ZONE: {zone.name} ({zone.status})
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Overlaid AI Detection Bounding Boxes */}
-              {showBoxes && (
-                <div className="absolute inset-0 pointer-events-none p-4">
-                  {activeCamera.currentRisk === 'CRITICAL' || activeCamera.currentRisk === 'HIGH' ? (
-                    <>
-                      <div className="border-2 border-red-500 bg-red-500/15 rounded absolute left-[22%] top-[20%] w-[32%] h-[58%] flex flex-col justify-between p-1.5 animate-pulse">
-                        <div className="flex flex-col gap-1 self-start">
-                          <span className="bg-red-600 text-white font-mono font-bold text-[9px] px-1.5 py-0.5 rounded">
-                            PERSON &bull; NO HELMET 94%
-                          </span>
-                          <span className="bg-amber-600 text-white font-mono font-bold text-[9px] px-1.5 py-0.5 rounded">
-                            RESTRICTED ZONE BREACH 88%
-                          </span>
-                        </div>
-                        <span className="text-[9px] font-mono text-red-300 bg-slate-950/80 px-1 rounded self-start">
-                          ID: TRK-084 &bull; RISK: CRITICAL
-                        </span>
-                      </div>
-
-                      <div className="border border-emerald-500 bg-emerald-500/10 rounded absolute left-[60%] top-[30%] w-[26%] h-[50%] flex flex-col justify-between p-1.5">
-                        <span className="bg-emerald-700 text-white font-mono font-bold text-[9px] px-1.5 py-0.5 rounded self-start">
-                          PERSON &bull; PPE OK 96%
-                        </span>
-                        <span className="text-[9px] font-mono text-emerald-300 bg-slate-950/80 px-1 rounded self-start">
-                          ID: TRK-085 &bull; COMPLIANT
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="border border-emerald-500 bg-emerald-500/10 rounded absolute left-[30%] top-[25%] w-[38%] h-[55%] flex flex-col justify-between p-1.5">
-                      <span className="bg-emerald-700 text-white font-mono font-bold text-[9px] px-1.5 py-0.5 rounded self-start">
-                        PERSON &bull; PPE COMPLIANT 98%
-                      </span>
-                      <span className="text-[9px] font-mono text-emerald-300 bg-slate-950/80 px-1 rounded self-start">
-                        SAFE &bull; HARDHAT + VEST VERIFIED
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Feed Stream Status Badge */}
-              <div className="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-xs px-2.5 py-1 rounded text-[10px] font-mono text-white flex items-center gap-2 border border-slate-800">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>RTSP/H.264 &bull; 1080p &bull; 84ms Latency</span>
-              </div>
             </div>
 
-            {/* Bottom Stream Control Strip */}
-            <div className="p-3 bg-slate-900 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+            {/* Quick Stream Overlays Toggle Strip */}
+            <div className="vg-card p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center gap-1 font-mono transition"
-                >
-                  {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                  <span>{isPlaying ? 'Pause' : 'Resume'}</span>
-                </button>
-
-                <button
-                  onClick={() => setIsAudioMuted(!isAudioMuted)}
-                  className={`p-1.5 rounded border transition flex items-center gap-1 font-mono ${
-                    isAudioMuted
-                      ? 'bg-slate-800 text-slate-400 border-slate-700'
-                      : 'bg-sky-900/60 text-sky-300 border-sky-600'
-                  }`}
-                  title={isAudioMuted ? 'Unmute Audio Chime' : 'Mute Audio Chime'}
-                >
-                  {isAudioMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-                  <span>{isAudioMuted ? 'Muted' : 'Audio ON'}</span>
-                </button>
-
-                <button
-                  onClick={handleSnapshot}
-                  className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center gap-1 font-mono transition"
-                  title="Capture High-Res Evidence Snapshot"
-                >
-                  <SnapshotIcon className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Snapshot</span>
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-700 uppercase tracking-wide text-[11px]">Stream Overlays:</span>
                 <button
                   onClick={() => setShowBoxes(!showBoxes)}
-                  className={`px-2.5 py-1 rounded text-xs font-mono font-semibold transition border ${
+                  className={`px-3 py-1 rounded text-xs font-mono font-bold transition border ${
                     showBoxes
                       ? 'bg-sky-700 text-white border-sky-600'
-                      : 'bg-slate-800 text-slate-400 border-slate-700'
+                      : 'bg-slate-100 text-slate-600 border-slate-300'
                   }`}
                 >
-                  AI Overlays: {showBoxes ? 'ON' : 'OFF'}
+                  AI Detection Overlays: {showBoxes ? 'ON' : 'OFF'}
                 </button>
 
                 <button
                   onClick={() => setShowZones(!showZones)}
-                  className={`px-2.5 py-1 rounded text-xs font-mono font-semibold transition border ${
+                  className={`px-3 py-1 rounded text-xs font-mono font-bold transition border ${
                     showZones
                       ? 'bg-sky-700 text-white border-sky-600'
-                      : 'bg-slate-800 text-slate-400 border-slate-700'
+                      : 'bg-slate-100 text-slate-600 border-slate-300'
                   }`}
                 >
-                  Zones: {showZones ? 'ON' : 'OFF'}
+                  Virtual Zones: {showZones ? 'ON' : 'OFF'}
                 </button>
+              </div>
+
+              <div className="text-[11px] font-mono text-slate-500">
+                Source Type: <strong className="text-slate-800">{activeCamera.type || 'Demo Stream'}</strong>
               </div>
             </div>
           </div>
@@ -539,12 +401,8 @@ export const LiveMonitoringPage = () => {
                   <Zap className="w-3.5 h-3.5 text-amber-600" />
                   Simulated Detection Triggers
                 </span>
-                <span className="text-[10px] font-mono text-slate-400">TEST CONTROLS</span>
+                <span className="text-[10px] font-mono text-slate-400">DEMO AI</span>
               </div>
-
-              <p className="text-[11px] text-slate-500">
-                Inject verified test scenarios to evaluate hazard bounding boxes, real-time audio sirens, and incident creation.
-              </p>
 
               <div className="space-y-1.5">
                 <button
@@ -610,14 +468,14 @@ export const LiveMonitoringPage = () => {
         </div>
       )}
 
-      {/* ADD CAMERA MODAL (Requirement 6) */}
+      {/* ADD CAMERA MODAL (Requirement 2) */}
       {showAddCameraModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="w-full max-w-lg bg-white border border-slate-200 rounded-lg shadow-xl overflow-hidden text-slate-800">
             <div className="px-5 py-3.5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Camera className="w-4 h-4 text-slate-700" />
-                <h3 className="font-bold text-slate-900 text-sm">Add CCTV / IP Camera Stream</h3>
+                <h3 className="font-bold text-slate-900 text-sm">Add Camera Feed</h3>
               </div>
               <button
                 onClick={() => setShowAddCameraModal(false)}
@@ -636,13 +494,13 @@ export const LiveMonitoringPage = () => {
                     required
                     value={newCamera.name}
                     onChange={(e) => setNewCamera({ ...newCamera, name: e.target.value })}
-                    placeholder="e.g. West Perimeter Scaffold"
+                    placeholder="e.g. North Gate Camera"
                     className="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Monitored Site</label>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Site</label>
                   <select
                     value={newCamera.site}
                     onChange={(e) => setNewCamera({ ...newCamera, site: e.target.value })}
@@ -657,41 +515,69 @@ export const LiveMonitoringPage = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Camera Stream Type</label>
-                  <select
-                    value={newCamera.type}
-                    onChange={(e) => setNewCamera({ ...newCamera, type: e.target.value })}
-                    className="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-600"
-                  >
-                    <option value="RTSP Stream">RTSP Stream</option>
-                    <option value="IP Camera">IP Camera (H.264/WebRTC)</option>
-                    <option value="ONVIF">ONVIF Profile S/T</option>
-                    <option value="Webcam">Local USB / Webcam</option>
-                    <option value="Demo Video">Demo Video Loop</option>
-                    <option value="Upload Video">Upload MP4 Inspection Video</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Location / Sector</label>
-                  <input
-                    type="text"
-                    value={newCamera.location}
-                    onChange={(e) => setNewCamera({ ...newCamera, location: e.target.value })}
-                    placeholder="e.g. Zone B Level 6"
-                    className="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-600"
-                  />
+              {/* Source Type Selector Buttons */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Source Type</label>
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                  {['Webcam', 'Upload Video', 'Demo Video', 'HLS/WebRTC', 'RTSP'].map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => {
+                        setNewCamera({ ...newCamera, type: st });
+                        setTestResult(null);
+                      }}
+                      className={`py-1.5 px-2 rounded border text-center font-bold text-[11px] transition ${
+                        newCamera.type === st || (newCamera.type === 'Demo Feed' && st === 'Demo Video')
+                          ? 'bg-sky-700 text-white border-sky-700'
+                          : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-300'
+                      }`}
+                    >
+                      {st}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* RTSP Fields */}
-              {newCamera.type.includes('RTSP') || newCamera.type.includes('IP') || newCamera.type.includes('ONVIF') ? (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded space-y-2.5">
-                  <span className="font-bold text-slate-900 block text-[11px]">Stream Gateway Credentials</span>
+              {/* Dynamic Source Type Panels */}
+              {newCamera.type === 'Upload Video' && (
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded space-y-2">
+                  <span className="font-bold text-slate-900 block text-[11px]">Upload Local MP4/WebM Video</span>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="video/mp4,video/webm,video/ogg"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full py-3 border-2 border-dashed border-slate-300 hover:border-sky-600 rounded bg-white text-slate-700 hover:text-sky-700 text-xs font-bold transition flex flex-col items-center justify-center gap-1"
+                  >
+                    <Upload className="w-5 h-5 text-slate-400" />
+                    <span>Choose Video File (MP4, WebM)</span>
+                  </button>
+                </div>
+              )}
+
+              {newCamera.type === 'Webcam' && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded text-emerald-800 space-y-1">
+                  <span className="font-bold block text-xs flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    ● CAMERA CONNECTED (Browser Device)
+                  </span>
+                  <p className="text-[11px] text-emerald-700">
+                    Resolution: 1280x720 (HD) &bull; FPS: 30 &bull; Real-time AI processing ready.
+                  </p>
+                </div>
+              )}
+
+              {newCamera.type === 'RTSP' && (
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded space-y-2">
+                  <span className="font-bold text-slate-900 block text-[11px]">RTSP Stream Gateway</span>
                   <div>
-                    <label className="block text-[10px] text-slate-500 font-mono mb-0.5">Stream URL (RTSP / WebRTC)</label>
+                    <label className="block text-[10px] text-slate-500 font-mono mb-0.5">Stream URL</label>
                     <input
                       type="text"
                       value={newCamera.rtspUrl}
@@ -721,13 +607,33 @@ export const LiveMonitoringPage = () => {
                     </div>
                   </div>
 
-                  <p className="text-[10px] text-slate-500 leading-tight">
-                    * Browser streams are piped via VisionGuard WebRTC / HLS backend gateway. Raw RTSP packets are transcoded in real-time.
-                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleTestConnection}
+                      disabled={isTestingConn}
+                      className="px-3 py-1 bg-white hover:bg-slate-100 border border-slate-300 rounded text-slate-800 font-bold text-xs transition"
+                    >
+                      {isTestingConn ? 'Testing Handshake...' : 'TEST CONNECTION'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewCamera({ ...newCamera, type: 'Demo Video' });
+                        setTestResult({
+                          success: true,
+                          message: 'Demo stream synced at 30 FPS with sub-100ms latency.',
+                        });
+                      }}
+                      className="px-3 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-300 rounded text-xs font-bold transition"
+                    >
+                      USE DEMO FEED
+                    </button>
+                  </div>
                 </div>
-              ) : null}
+              )}
 
-              {/* Test Connection Results */}
+              {/* Test Result Message */}
               {testResult && (
                 <div className={`p-2.5 rounded border text-xs ${
                   testResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'
@@ -739,31 +645,20 @@ export const LiveMonitoringPage = () => {
                 </div>
               )}
 
-              <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                 <button
                   type="button"
-                  onClick={handleTestConnection}
-                  disabled={isTestingConn}
-                  className="px-3 py-1.5 rounded bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 font-bold text-xs transition"
+                  onClick={() => setShowAddCameraModal(false)}
+                  className="px-3 py-1.5 text-slate-600 hover:text-slate-800 text-xs font-medium"
                 >
-                  {isTestingConn ? 'Testing Stream Handshake...' : 'Test Connection'}
+                  Cancel
                 </button>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddCameraModal(false)}
-                    className="px-3 py-1.5 text-slate-600 hover:text-slate-800 text-xs font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="vg-btn-primary text-xs font-bold px-4 py-1.5"
-                  >
-                    Add Camera Stream
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  className="vg-btn-primary text-xs font-bold px-4 py-1.5"
+                >
+                  ADD CAMERA
+                </button>
               </div>
             </form>
           </div>

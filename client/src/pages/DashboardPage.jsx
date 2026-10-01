@@ -24,6 +24,7 @@ import {
 import { useInspections } from '../context/InspectionContext';
 import { RiskBadge } from '../components/common/RiskBadge';
 import { IncidentModal } from '../components/common/IncidentModal';
+import { CameraStreamPlayer } from '../components/camera/CameraStreamPlayer';
 
 export const DashboardPage = () => {
   const {
@@ -216,60 +217,14 @@ export const DashboardPage = () => {
                 key={cam.id}
                 className="border border-slate-200 rounded-md overflow-hidden bg-white shadow-2xs flex flex-col justify-between hover:border-slate-300 transition"
               >
-                {/* Top Meta Bar */}
-                <div className="px-3 py-1.5 bg-slate-900 text-white flex items-center justify-between text-[11px] font-mono">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="font-bold text-emerald-300">LIVE</span>
-                    <span className="text-slate-400">&bull;</span>
-                    <span className="font-bold text-white">{cam.id}</span>
-                  </div>
-                  <span className="text-slate-400 text-[10px]">{cam.fps} FPS</span>
-                </div>
-
-                {/* Video / High-Res Camera Stream Container */}
-                <div className="relative aspect-video bg-slate-950 overflow-hidden group">
-                  <img
-                    src={cam.feedUrl || 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=800&auto=format&fit=crop'}
-                    alt={cam.name}
-                    className="w-full h-full object-cover"
-                  />
-
-                  {/* Overlaid AI Detection Bounding Boxes & Tags */}
-                  {cam.currentRisk === 'CRITICAL' || cam.currentRisk === 'HIGH' ? (
-                    <div className="absolute inset-0 pointer-events-none p-2">
-                      <div className="border border-red-500 bg-red-500/15 rounded absolute left-[20%] top-[15%] w-[45%] h-[60%] flex flex-col justify-between p-1">
-                        <div className="flex flex-col gap-0.5 self-start">
-                          <span className="bg-red-600 text-white font-mono font-bold text-[8px] px-1 py-0.5 rounded">
-                            PERSON &bull; NO HELMET 94%
-                          </span>
-                          <span className="bg-amber-600 text-white font-mono font-bold text-[8px] px-1 py-0.5 rounded">
-                            RESTRICTED ZONE 88%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="absolute inset-0 pointer-events-none p-2">
-                      <div className="border border-emerald-500 bg-emerald-500/10 rounded absolute left-[25%] top-[20%] w-[35%] h-[55%] flex flex-col justify-between p-1">
-                        <span className="bg-emerald-700 text-white font-mono font-bold text-[8px] px-1 py-0.5 rounded self-start">
-                          PERSON &bull; PPE COMPLIANT 98%
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Top-Right Risk Severity Badge */}
-                  <div className="absolute top-2 right-2">
-                    <RiskBadge level={cam.currentRisk} size="sm" />
-                  </div>
-
-                  {/* Stream Status Overlay */}
-                  <div className="absolute bottom-1 left-2 right-2 flex items-center justify-between text-[10px] font-mono text-slate-300 bg-slate-950/80 px-2 py-0.5 rounded">
-                    <span className="truncate">{cam.siteCode || 'SITE'}</span>
-                    <span className="text-emerald-400 font-bold">ONLINE</span>
-                  </div>
-                </div>
+                {/* Video / Camera Stream Component */}
+                <CameraStreamPlayer
+                  camera={cam}
+                  isDetailed={false}
+                  showOverlays={true}
+                  showZones={false}
+                  matchingIncident={matchingIncident}
+                />
 
                 {/* Card Information */}
                 <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
