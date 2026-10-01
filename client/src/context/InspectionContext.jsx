@@ -549,6 +549,135 @@ export const InspectionProvider = ({ children }) => {
     setInspections((prev) => prev.filter((item) => item.id !== id));
   };
 
+  // Camera Management CRUD
+  const addCamera = (cameraData) => {
+    const newId = `CAM-${String(cameras.length + 1).padStart(3, '0')}`;
+    const newCam = {
+      id: newId,
+      name: cameraData.name || `CCTV Stream ${newId}`,
+      site: cameraData.site || 'Apex Tower Project',
+      siteCode: cameraData.siteCode || 'APX-B',
+      location: cameraData.location || cameraData.zone || 'Main Operational Yard',
+      status: 'ONLINE',
+      health: 'Good',
+      resolution: cameraData.resolution || '1080p (FHD)',
+      fps: 30,
+      bitrate: '3.8 Mbps',
+      currentRisk: 'SAFE',
+      lastPing: 'Just now',
+      uptime: '100%',
+      activeDetections: 0,
+      feedUrl: cameraData.feedUrl || (cameraData.type === 'Webcam' ? 'WEBCAM' : 'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?q=80&w=1200&auto=format&fit=crop'),
+      type: cameraData.type || 'RTSP Stream',
+      zones: [
+        { id: `Z-${Date.now()}`, name: `${cameraData.zone || 'Work'} Perimeter`, type: 'SAFE_ZONE', color: '#16A34A', status: 'NORMAL' }
+      ]
+    };
+    setCameras((prev) => [newCam, ...prev]);
+    return newCam;
+  };
+
+  const updateCamera = (id, data) => {
+    setCameras((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, ...data } : c))
+    );
+  };
+
+  const deleteCamera = (id) => {
+    setCameras((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const testCameraConnection = async (params) => {
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    // Simulate handshake check
+    if (params?.url?.includes('fail') || params?.ip === '0.0.0.0') {
+      return { success: false, message: 'Handshake timeout. RTSP port 554 unreachable or authentication failed.' };
+    }
+    return {
+      success: true,
+      message: 'Connection verified. RTSP/H.264 stream synced at 30 FPS with sub-100ms latency.',
+      codec: 'H.264 / AAC',
+      resolution: '1920x1080',
+      fps: 30
+    };
+  };
+
+  // Site Management CRUD
+  const addSite = (siteData) => {
+    const newSite = {
+      id: `SITE-${String(sites.length + 1).padStart(2, '0')}`,
+      name: siteData.name,
+      code: siteData.code || siteData.name.slice(0, 3).toUpperCase(),
+      address: siteData.address || 'Industrial Zone Sector 1',
+      activeSupervisors: Number(siteData.activeSupervisors) || 2,
+      openRisks: 0,
+      safetyScore: 98,
+      type: siteData.type || 'Construction'
+    };
+    setSites((prev) => [...prev, newSite]);
+    return newSite;
+  };
+
+  const updateSite = (id, siteData) => {
+    setSites((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, ...siteData } : s))
+    );
+  };
+
+  // Team & Roles Management
+  const [teamMembers, setTeamMembers] = useState([
+    { id: 'TM-01', name: 'Marcus Vance', email: 'm.vance@visionguard.ai', role: 'Safety Supervisor', status: 'Active', site: 'Apex Tower Project', lastActive: '5m ago' },
+    { id: 'TM-02', name: 'Sarah Connor', email: 's.connor@visionguard.ai', role: 'Safety Manager', status: 'Active', site: 'Harbor Gateway Logistics Yard', lastActive: '12m ago' },
+    { id: 'TM-03', name: 'David Miller', email: 'd.miller@visionguard.ai', role: 'Safety Officer', status: 'Active', site: 'Eastside Medical Center Phase 2', lastActive: '1h ago' },
+    { id: 'TM-04', name: 'Elena Rostova', email: 'e.rostova@visionguard.ai', role: 'Operator', status: 'Active', site: 'Apex Tower Project', lastActive: 'Just now' },
+    { id: 'TM-05', name: 'Jackson Reed', email: 'j.reed@visionguard.ai', role: 'Admin', status: 'Active', site: 'All Sites', lastActive: '2m ago' },
+  ]);
+
+  const addTeamMember = (member) => {
+    const newMember = {
+      id: `TM-${String(teamMembers.length + 1).padStart(2, '0')}`,
+      status: 'Active',
+      lastActive: 'Just invited',
+      ...member
+    };
+    setTeamMembers((prev) => [newMember, ...prev]);
+    return newMember;
+  };
+
+  const updateTeamMemberRole = (id, role) => {
+    setTeamMembers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, role } : m))
+    );
+  };
+
+  const removeTeamMember = (id) => {
+    setTeamMembers((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  // Selected Global Site Filter
+  const [selectedSite, setSelectedSite] = useState('All Sites');
+
+  // System Health state
+  const [systemHealth, setSystemHealth] = useState({
+    cameraService: 'Operational',
+    aiDetection: 'Operational',
+    alertService: 'Operational',
+    database: 'Operational',
+  });
+
+  // Event actions
+  const acknowledgeEvent = (eventId) => {
+    updateIncidentStatus(eventId, 'ACKNOWLEDGED');
+  };
+
+  const assignEvent = (eventId, assignee, notes) => {
+    assignIncident(eventId, assignee, null, notes);
+  };
+
+  const resolveEvent = (eventId, notes) => {
+    updateIncidentStatus(eventId, 'CLOSED', { correctiveActionNotes: notes });
+  };
+
   const updateFindingStatus = (inspectionId, findingId, newStatus) => {
     setInspections((prev) =>
       prev.map((insp) => {
@@ -754,7 +883,7 @@ export const InspectionProvider = ({ children }) => {
 
     // Default status summary
     return {
-      answer: `VisionGuard Industrial Status Summary: Overall Site Safety Score is ${stats.siteSafetyScore}/100. ${stats.activeCamerasCount} of ${cameras.length} CCTV cameras are online. Total active critical hazards: ${stats.criticalHazards}. Active open incidents: ${stats.activeIncidentsCount}.`,
+      answer: `VisionGuard Industrial Status Summary: Overall Site Safety Score is ${stats.siteSafetyScore}/100. ${stats.onlineCamerasCount} of ${cameras.length} CCTV cameras are online. Total active critical hazards: ${stats.criticalHazards}. Active open incidents: ${stats.activeIncidentsCount}.`,
       data: stats,
     };
   };
@@ -773,7 +902,19 @@ export const InspectionProvider = ({ children }) => {
 
   // Compute aggregate stats
   const getStats = () => {
-    const total = inspections.length;
+    const filteredInspections = selectedSite === 'All Sites' 
+      ? inspections 
+      : inspections.filter((i) => i.site === selectedSite);
+    
+    const filteredCameras = selectedSite === 'All Sites'
+      ? cameras
+      : cameras.filter((c) => c.site === selectedSite);
+
+    const filteredIncidents = selectedSite === 'All Sites'
+      ? incidents
+      : incidents.filter((i) => i.site === selectedSite);
+
+    const total = filteredInspections.length;
     let criticalHazards = 0;
     let warningHazards = 0;
     let openIssues = 0;
@@ -784,7 +925,7 @@ export const InspectionProvider = ({ children }) => {
     const riskCounts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, SAFE: 0 };
     const allHazards = [];
 
-    inspections.forEach((insp) => {
+    filteredInspections.forEach((insp) => {
       const r = (insp.riskLevel || 'LOW').toUpperCase();
       if (riskCounts[r] !== undefined) riskCounts[r]++;
       else riskCounts.LOW++;
@@ -797,6 +938,7 @@ export const InspectionProvider = ({ children }) => {
         const s = (f.severity || 'LOW').toUpperCase();
         if (s === 'CRITICAL') criticalHazards++;
         if (s === 'HIGH' || s === 'MEDIUM') warningHazards++;
+
         if (f.status === 'Open' || f.status === 'In Progress') openIssues++;
         if (f.status === 'Resolved' || f.status === 'Compliant') resolvedIssues++;
 
@@ -815,31 +957,33 @@ export const InspectionProvider = ({ children }) => {
     const siteSafetyScore = calculateSiteSafetyScore({
       ppeComplianceRate,
       criticalHazards,
-      openIncidents: incidents.filter((i) => i.status !== 'CLOSED').length,
-      resolvedIncidents: incidents.filter((i) => i.status === 'CLOSED').length,
+      openIncidents: filteredIncidents.filter((i) => i.status !== 'CLOSED').length,
+      resolvedIncidents: filteredIncidents.filter((i) => i.status === 'CLOSED').length,
     });
 
     const complianceRate = totalIssues > 0
       ? ((resolvedIssues / totalIssues) * 100).toFixed(1)
       : '98.5';
 
-    const onlineCameras = cameras.filter((c) => c.status === 'ONLINE').length;
+    const onlineCameras = filteredCameras.filter((c) => c.status === 'ONLINE').length;
+    const offlineCameras = filteredCameras.length - onlineCameras;
 
     return {
       total,
       criticalHazards,
       warningHazards,
       openIssues,
-      resolvedTodayCount: incidents.filter((i) => i.status === 'CLOSED').length,
+      resolvedTodayCount: filteredIncidents.filter((i) => i.status === 'CLOSED').length,
       complianceRate: `${complianceRate}%`,
       ppeComplianceRate: `${ppeComplianceRate}%`,
       siteSafetyScore,
       avgConfidence: total > 0 ? (totalConfidence / total).toFixed(1) : '96.2',
       riskCounts,
       allHazards,
-      activeIncidentsCount: incidents.filter((i) => i.status !== 'CLOSED').length,
+      activeIncidentsCount: filteredIncidents.filter((i) => i.status !== 'CLOSED').length,
       onlineCamerasCount: onlineCameras,
-      totalCamerasCount: cameras.length,
+      offlineCamerasCount: offlineCameras,
+      totalCamerasCount: filteredCameras.length,
     };
   };
 
@@ -847,9 +991,23 @@ export const InspectionProvider = ({ children }) => {
     <InspectionContext.Provider
       value={{
         sites,
+        addSite,
+        updateSite,
         cameras,
+        addCamera,
+        updateCamera,
+        deleteCamera,
+        testCameraConnection,
         inspections,
         incidents,
+        teamMembers,
+        addTeamMember,
+        updateTeamMemberRole,
+        removeTeamMember,
+        selectedSite,
+        setSelectedSite,
+        systemHealth,
+        setSystemHealth,
         notifications,
         activeAlert,
         isAudioMuted,
@@ -866,6 +1024,9 @@ export const InspectionProvider = ({ children }) => {
         addIncident,
         updateIncidentStatus,
         assignIncident,
+        acknowledgeEvent,
+        assignEvent,
+        resolveEvent,
         runSafetyScenario,
         askSafetyAssistant,
         resetDemo,
@@ -884,4 +1045,5 @@ export const useInspections = () => {
   }
   return context;
 };
+
 
