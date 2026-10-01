@@ -1,31 +1,48 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const env = require('./config/env');
 const errorHandler = require('./middlewares/errorHandler');
+
+const authRoutes = require('./routes/authRoutes');
+const inspectionRoutes = require('./routes/inspectionRoutes');
 
 const app = express();
 
 // Middlewares
 app.use(cors({
   origin: env.CLIENT_URL,
-  credentials: true
+  credentials: true,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Routes
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+
+// Serve static uploads
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+
+// Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'online',
+    system: 'VisionGuard AI Intelligence Core',
+    version: '2.4.0',
+    timestamp: new Date().toISOString(),
+  });
 });
 
-// Import specific routes (to be implemented)
-// const authRoutes = require('./routes/authRoutes');
-// app.use('/api/auth', authRoutes);
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/inspections', inspectionRoutes);
 
-// Error Handling Middleware - should be last
+// Error Handling Middleware (must be registered last)
 app.use(errorHandler);
 
 const PORT = env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running in ${env.NODE_ENV} mode on port ${PORT}`);
+  console.log(`========================================`);
+  console.log(`  VisionGuard AI Backend Engine Online`);
+  console.log(`  Port: ${PORT} | Env: ${env.NODE_ENV}`);
+  console.log(`  Health Check: http://localhost:${PORT}/api/health`);
+  console.log(`========================================`);
 });
