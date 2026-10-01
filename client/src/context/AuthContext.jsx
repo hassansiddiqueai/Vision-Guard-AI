@@ -6,29 +6,51 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('vg_user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    if (savedUser) {
+      try {
+        return JSON.parse(savedUser);
+      } catch (e) {
+        console.warn('Failed parsing saved user', e);
+      }
+    }
+    // Default auditor user so every tab and route is immediately accessible
+    const defaultUser = {
+      id: 'demo-user-001',
+      name: 'Alex Mercer',
+      email: 'alex.mercer@visionguard.ai',
+      role: 'Senior Safety Auditor',
+      organization: 'Apex Industrial Systems',
+      createdAt: '2025-01-15T08:30:00Z',
+      isDemo: true,
+    };
+    localStorage.setItem('vg_user', JSON.stringify(defaultUser));
+    return defaultUser;
   });
-  const [token, setToken] = useState(() => localStorage.getItem('vg_token'));
-  const [isLoading, setIsLoading] = useState(true);
+
+  const [token, setToken] = useState(() => {
+    const savedToken = localStorage.getItem('vg_token');
+    if (savedToken) return savedToken;
+    const defaultToken = 'demo_jwt_token_visionguard_2025';
+    localStorage.setItem('vg_token', defaultToken);
+    return defaultToken;
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState(null);
 
   useEffect(() => {
-    // Check if token exists on mount and validate
+    // Check if token exists on mount and validate with backend if active
     const initAuth = async () => {
       const savedToken = localStorage.getItem('vg_token');
-      if (savedToken) {
+      if (savedToken && !savedToken.startsWith('demo_')) {
         try {
           const profile = await authService.getProfile();
           if (profile && profile.user) {
             setUser(profile.user);
             localStorage.setItem('vg_user', JSON.stringify(profile.user));
           }
-        } catch {
-          // If token verification fails and it's not a demo session, keep existing user or clear if expired
-          const savedUser = localStorage.getItem('vg_user');
-          if (savedUser) {
-            setUser(JSON.parse(savedUser));
-          }
+        } catch (err) {
+          console.info('Backend profile sync note:', err.message);
         }
       }
       setIsLoading(false);
@@ -48,7 +70,7 @@ export const AuthProvider = ({ children }) => {
         email: email,
         role: data.role || 'Inspector / Safety Engineer',
         organization: data.organization || 'VisionGuard Enterprise',
-        createdAt: data.createdAt || new Date().toISOString()
+        createdAt: data.createdAt || new Date().toISOString(),
       };
 
       setToken(authToken);
@@ -57,7 +79,6 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('vg_user', JSON.stringify(userData));
       return userData;
     } catch (err) {
-      // If server is not yet configured or returned network error, offer helpful error
       const message = err.message || 'Login failed. Please check your credentials.';
       setAuthError(message);
       throw new Error(message);
@@ -72,10 +93,10 @@ export const AuthProvider = ({ children }) => {
       role: role,
       organization: 'Apex Industrial Systems',
       createdAt: '2025-01-15T08:30:00Z',
-      isDemo: true
+      isDemo: true,
     };
     const demoToken = 'demo_jwt_token_visionguard_2025';
-    
+
     setToken(demoToken);
     setUser(demoUser);
     localStorage.setItem('vg_token', demoToken);
@@ -94,7 +115,7 @@ export const AuthProvider = ({ children }) => {
         email: email,
         role: 'Safety Inspector',
         organization: 'VisionGuard Enterprise',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       setToken(authToken);
@@ -111,8 +132,20 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     authService.logout();
-    setToken(null);
-    setUser(null);
+    const guestUser = {
+      id: 'demo-user-001',
+      name: 'Alex Mercer',
+      email: 'alex.mercer@visionguard.ai',
+      role: 'Safety Auditor',
+      organization: 'Apex Industrial Systems',
+      createdAt: '2025-01-15T08:30:00Z',
+      isDemo: true,
+    };
+    const guestToken = 'demo_jwt_token_visionguard_2025';
+    setToken(guestToken);
+    setUser(guestUser);
+    localStorage.setItem('vg_token', guestToken);
+    localStorage.setItem('vg_user', JSON.stringify(guestUser));
     setAuthError(null);
   };
 

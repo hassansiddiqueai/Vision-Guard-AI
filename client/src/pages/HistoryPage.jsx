@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { inspectionService } from '../services/inspectionService';
 import { RiskBadge } from '../components/common/RiskBadge';
 import { ConfidenceBar } from '../components/common/ConfidenceBar';
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 export const HistoryPage = () => {
+  const navigate = useNavigate();
   const [inspections, setInspections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -241,7 +242,7 @@ export const HistoryPage = () => {
                       <tr
                         key={item.id}
                         className="hover:bg-slate-850/40 transition group cursor-pointer"
-                        onClick={() => (window.location.href = `/inspection/${item.id}`)}
+                        onClick={() => navigate(`/inspection/${item.id}`)}
                       >
                         <td className="py-4 px-4 font-sans">
                           <div className="flex items-center gap-3">

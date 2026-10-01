@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   Bell,
   Eye,
@@ -12,7 +13,9 @@ export const SettingsPage = () => {
     if (saved) {
       try {
         return JSON.parse(saved);
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Failed parsing settings:', e);
+      }
     }
     return {
       // Appearance
