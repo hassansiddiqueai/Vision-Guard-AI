@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, CircleDashed, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 
 export const PipelineStep = ({
   stepNumber,
@@ -8,25 +8,25 @@ export const PipelineStep = ({
   status = 'pending', // 'completed' | 'active' | 'pending' | 'error'
 }) => {
   return (
-    <div className="flex items-start gap-3.5 relative">
+    <div className="flex items-start gap-3 relative">
       <div className="flex flex-col items-center">
         <div
-          className={`w-7 h-7 rounded-full flex items-center justify-center font-mono text-xs transition-all duration-300 ${
+          className={`w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs transition-colors ${
             status === 'completed'
-              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50'
+              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
               : status === 'active'
-              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)] animate-pulse'
+              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500'
               : status === 'error'
-              ? 'bg-rose-500/20 text-rose-400 border border-rose-500/50'
-              : 'bg-slate-800/80 text-slate-500 border border-slate-700/60'
+              ? 'bg-red-500/20 text-red-400 border border-red-500/40'
+              : 'bg-[#111C2E] text-slate-500 border border-[#243247]'
           }`}
         >
           {status === 'completed' ? (
-            <CheckCircle2 className="w-4 h-4" />
+            <CheckCircle2 className="w-3.5 h-3.5" />
           ) : status === 'active' ? (
-            <CircleDashed className="w-4 h-4 animate-spin text-cyan-400" />
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
           ) : status === 'error' ? (
-            <AlertCircle className="w-4 h-4" />
+            <AlertCircle className="w-3.5 h-3.5" />
           ) : (
             <span>{stepNumber}</span>
           )}
@@ -35,22 +35,23 @@ export const PipelineStep = ({
 
       <div className="pt-0.5">
         <p
-          className={`text-sm font-medium ${
+          className={`text-xs font-medium ${
             status === 'active'
               ? 'text-cyan-300 font-semibold'
               : status === 'completed'
               ? 'text-slate-200'
               : status === 'error'
-              ? 'text-rose-400 font-semibold'
-              : 'text-slate-500'
+              ? 'text-red-400 font-semibold'
+              : 'text-slate-400'
           }`}
         >
           {title}
         </p>
         {subtitle && (
-          <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{subtitle}</p>
+          <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{subtitle}</p>
         )}
       </div>
     </div>
   );
 };
+

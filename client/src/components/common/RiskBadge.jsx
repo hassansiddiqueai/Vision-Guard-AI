@@ -7,27 +7,33 @@ export const RiskBadge = ({ level = 'LOW', size = 'md', className = '' }) => {
   const config = {
     LOW: {
       bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-      dot: 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]',
+      dot: 'bg-emerald-400',
       icon: ShieldCheck,
-      label: 'LOW RISK',
+      label: 'LOW',
     },
     MEDIUM: {
       bg: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-      dot: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]',
+      dot: 'bg-amber-400',
       icon: AlertTriangle,
-      label: 'MEDIUM RISK',
+      label: 'MEDIUM',
     },
     HIGH: {
       bg: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
-      dot: 'bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.6)]',
+      dot: 'bg-orange-400',
       icon: AlertOctagon,
-      label: 'HIGH RISK',
+      label: 'HIGH',
     },
     CRITICAL: {
-      bg: 'bg-rose-500/15 text-rose-400 border-rose-500/40 animate-pulse',
-      dot: 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.8)]',
+      bg: 'bg-red-500/10 text-red-400 border-red-500/30',
+      dot: 'bg-red-500',
       icon: Flame,
-      label: 'CRITICAL HAZARD',
+      label: 'CRITICAL',
+    },
+    SAFE: {
+      bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+      dot: 'bg-emerald-400',
+      icon: ShieldCheck,
+      label: 'SAFE',
     },
   }[normalizedLevel] || {
     bg: 'bg-slate-800 text-slate-400 border-slate-700',
@@ -39,18 +45,19 @@ export const RiskBadge = ({ level = 'LOW', size = 'md', className = '' }) => {
   const Icon = config.icon;
 
   const sizeClasses = {
-    sm: 'text-xs px-2 py-0.5 gap-1.5',
-    md: 'text-xs font-semibold px-2.5 py-1 gap-1.5',
-    lg: 'text-sm font-bold px-3 py-1.5 gap-2',
-  }[size] || 'text-xs px-2.5 py-1 gap-1.5';
+    sm: 'text-[11px] px-2 py-0.5 gap-1.5',
+    md: 'text-xs font-medium px-2.5 py-0.5 gap-1.5',
+    lg: 'text-xs font-semibold px-3 py-1 gap-2',
+  }[size] || 'text-xs px-2.5 py-0.5 gap-1.5';
 
   return (
     <span
-      className={`inline-flex items-center rounded-md border font-mono uppercase tracking-wide ${config.bg} ${sizeClasses} ${className}`}
+      className={`inline-flex items-center rounded border font-medium uppercase tracking-wider ${config.bg} ${sizeClasses} ${className}`}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
-      <Icon className="w-3.5 h-3.5" />
+      <Icon className="w-3 h-3" />
       <span>{config.label}</span>
     </span>
   );
 };
+

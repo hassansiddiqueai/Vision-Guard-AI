@@ -9,12 +9,9 @@ export const ProtectedRoute = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-300">
-        <div className="relative flex items-center justify-center mb-4">
-          <div className="w-12 h-12 rounded-full border-2 border-cyan-500/20 border-t-cyan-400 animate-spin" />
-          <div className="absolute w-6 h-6 rounded-full bg-cyan-500/20 animate-pulse" />
-        </div>
-        <p className="text-sm font-mono text-cyan-400 tracking-wider">INITIALIZING VISIONGUARD...</p>
+      <div className="min-h-screen bg-[#0B1220] flex flex-col items-center justify-center text-slate-300">
+        <Loader2 className="w-8 h-8 text-cyan-400 animate-spin mb-3" />
+        <p className="text-xs text-slate-400">Loading session...</p>
       </div>
     );
   }
@@ -25,3 +22,4 @@ export const ProtectedRoute = ({ children }) => {
 
   return children;
 };
+

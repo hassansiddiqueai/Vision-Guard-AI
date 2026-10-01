@@ -12,41 +12,26 @@ export const StatCard = ({
 }) => {
   const accentConfigs = {
     cyan: {
-      border: 'hover:border-cyan-500/40',
-      iconBg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-      glow: 'group-hover:shadow-[0_0_20px_rgba(6,182,212,0.15)]',
+      iconBg: 'bg-[#0B1220] text-cyan-400 border-[#243247]',
     },
     emerald: {
-      border: 'hover:border-emerald-500/40',
-      iconBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-      glow: 'group-hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]',
+      iconBg: 'bg-[#0B1220] text-emerald-400 border-[#243247]',
     },
     amber: {
-      border: 'hover:border-amber-500/40',
-      iconBg: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-      glow: 'group-hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]',
+      iconBg: 'bg-[#0B1220] text-amber-400 border-[#243247]',
     },
     rose: {
-      border: 'hover:border-rose-500/40',
-      iconBg: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-      glow: 'group-hover:shadow-[0_0_20px_rgba(244,63,94,0.15)]',
-    },
-    purple: {
-      border: 'hover:border-purple-500/40',
-      iconBg: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-      glow: 'group-hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]',
+      iconBg: 'bg-[#0B1220] text-red-400 border-[#243247]',
     },
   };
 
   const config = accentConfigs[accent] || accentConfigs.cyan;
 
   return (
-    <div
-      className={`group relative bg-slate-900/80 border border-slate-800 rounded-xl p-5 transition-all duration-300 ${config.border} ${config.glow}`}
-    >
+    <div className="vg-card p-5">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-mono uppercase tracking-wider text-slate-400">{title}</p>
+          <p className="text-xs uppercase tracking-wider text-slate-400 font-medium">{title}</p>
           <div className="mt-2 flex items-baseline gap-2">
             {loading ? (
               <div className="h-8 w-20 bg-slate-800 rounded animate-pulse" />
@@ -57,19 +42,19 @@ export const StatCard = ({
             )}
             {trend && (
               <span
-                className={`text-xs font-mono ${
-                  trendPositive ? 'text-emerald-400' : 'text-rose-400'
+                className={`text-xs font-medium ${
+                  trendPositive ? 'text-emerald-400' : 'text-red-400'
                 }`}
               >
                 {trend}
               </span>
             )}
           </div>
-          {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+          {subtitle && <p className="mt-1 text-xs text-slate-400">{subtitle}</p>}
         </div>
 
         {Icon && (
-          <div className={`p-2.5 rounded-lg border ${config.iconBg}`}>
+          <div className={`p-2 rounded border ${config.iconBg}`}>
             <Icon className="w-5 h-5" />
           </div>
         )}
@@ -77,3 +62,4 @@ export const StatCard = ({
     </div>
   );
 };
+
