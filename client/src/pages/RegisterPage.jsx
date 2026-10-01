@@ -60,27 +60,50 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Real Industrial Photo Background with Dark Gradient Overlay */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=1600&auto=format&fit=crop"
+          alt="Industrial Site Background"
+          className="w-full h-full object-cover opacity-25 filter brightness-75 contrast-125 scale-105 transition-transform duration-1000"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080E1A] via-[#080E1A]/90 to-[#080E1A]/70" />
+        <div className="absolute inset-0 vg-dark-grid opacity-50 pointer-events-none" />
+        
+        {/* Animated Scanning Beam */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-sky-400/20 to-transparent h-28 w-full animate-scanline pointer-events-none" />
+
+        {/* Floating Radar Circle */}
+        <div className="absolute top-1/4 right-12 w-80 h-80 pointer-events-none opacity-20">
+          <div className="absolute inset-0 vg-radar-circle animate-hud-spin" />
+          <div className="absolute inset-10 vg-radar-circle" />
+          <div className="absolute inset-0 origin-center animate-radar">
+            <div className="w-1/2 h-1/2 bg-gradient-to-br from-sky-400/30 to-transparent rounded-tl-full" />
+          </div>
+        </div>
+      </div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <Link to="/" className="flex items-center justify-center gap-2 mb-6 group">
-          <div className="w-9 h-9 rounded-md bg-sky-700 flex items-center justify-center text-white font-bold">
+          <div className="w-9 h-9 rounded-md bg-sky-600 flex items-center justify-center text-white font-bold shadow-md shadow-sky-900/50">
             <Shield className="w-5 h-5" />
           </div>
-          <span className="font-bold text-xl tracking-tight text-slate-900">
-            VISION<span className="text-sky-700">GUARD</span>
+          <span className="font-bold text-xl tracking-tight text-white">
+            VISION<span className="text-sky-400">GUARD</span>
           </span>
         </Link>
 
-        <h2 className="text-center text-xl font-bold text-slate-900 tracking-tight">
+        <h2 className="text-center text-xl font-bold text-white tracking-tight">
           Create Safety Inspector Account
         </h2>
-        <p className="mt-1 text-center text-xs text-slate-500">
+        <p className="mt-1 text-center text-xs text-slate-400">
           Register credentials for authorized site safety monitoring
         </p>
       </div>
 
-      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="vg-card p-6 space-y-4">
+      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div className="vg-card p-6 space-y-4 bg-white/95 backdrop-blur-xs shadow-xl border border-slate-200">
           {error && (
             <div className="p-2.5 rounded-md bg-red-50 border border-red-200 flex items-start gap-2.5 text-xs text-red-700">
               <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />

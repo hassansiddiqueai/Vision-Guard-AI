@@ -20,6 +20,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useInspections } from '../../context/InspectionContext';
 import { SafetyAssistantDrawer } from '../common/SafetyAssistantDrawer';
 import { DemoScenarioToolbar } from '../common/DemoScenarioToolbar';
+import { BackgroundAtmosphere } from '../common/BackgroundAtmosphere';
 
 export const AppLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -75,7 +76,10 @@ export const AppLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex text-slate-900 antialiased font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] flex text-slate-900 antialiased font-sans relative overflow-x-hidden">
+      {/* Background Atmosphere with Radar & Interactive Photo Nodes */}
+      <BackgroundAtmosphere variant="light" />
+
       {/* Desktop Sidebar (Fixed Left) */}
       <div className="hidden lg:block shrink-0 sticky top-0 h-screen z-40">
         <Sidebar />
@@ -95,9 +99,9 @@ export const AppLayout = () => {
       )}
 
       {/* Main Viewport */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 relative z-10">
         {/* Enterprise Top Bar */}
-        <header className="sticky top-0 z-30 h-14 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between shadow-xs">
+        <header className="sticky top-0 z-30 h-14 bg-white/95 backdrop-blur-xs border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between shadow-2xs">
           <div className="flex items-center gap-3">
             {/* Mobile Menu Trigger */}
             <button
