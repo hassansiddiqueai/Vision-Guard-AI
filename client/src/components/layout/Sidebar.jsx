@@ -2,14 +2,17 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
-  ScanEye,
-  History,
-  BarChart3,
-  User,
+  ClipboardList,
+  PlusCircle,
+  Cctv,
+  AlertTriangle,
+  ShieldCheck,
+  FileText,
   Settings,
   LogOut,
   Shield,
-  Plus,
+  Activity,
+  User,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -19,41 +22,46 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
 
   const navItems = [
     {
-      name: 'Dashboard',
+      name: 'Overview',
       path: '/dashboard',
       icon: LayoutDashboard,
-      badge: null,
+    },
+    {
+      name: 'Inspections',
+      path: '/inspections',
+      icon: ClipboardList,
     },
     {
       name: 'New Inspection',
-      path: '/inspect',
-      icon: ScanEye,
+      path: '/inspections/new',
+      icon: PlusCircle,
       highlight: true,
-      badge: 'AI Core',
     },
     {
-      name: 'Inspection History',
-      path: '/history',
-      icon: History,
-      badge: null,
+      name: 'Live Monitoring',
+      path: '/monitoring',
+      icon: Cctv,
+      badge: 'SIM',
     },
     {
-      name: 'Analytics',
-      path: '/analytics',
-      icon: BarChart3,
-      badge: null,
+      name: 'Hazards',
+      path: '/hazards',
+      icon: AlertTriangle,
     },
     {
-      name: 'Profile',
-      path: '/profile',
-      icon: User,
-      badge: null,
+      name: 'Compliance',
+      path: '/compliance',
+      icon: ShieldCheck,
+    },
+    {
+      name: 'Reports',
+      path: '/reports',
+      icon: FileText,
     },
     {
       name: 'Settings',
       path: '/settings',
       icon: Settings,
-      badge: null,
     },
   ];
 
@@ -69,43 +77,39 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
   };
 
   return (
-    <aside className="h-full w-64 bg-slate-950/95 border-r border-slate-800/80 flex flex-col justify-between select-none">
+    <aside className="h-full w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between select-none text-slate-300">
       {/* Top Brand Section */}
       <div>
-        <div className="h-16 px-5 flex items-center justify-between border-b border-slate-850">
-          <NavLink to="/dashboard" onClick={handleNavClick} className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 p-0.5 shadow-[0_0_12px_rgba(6,182,212,0.35)]">
-              <div className="w-full h-full bg-slate-950 rounded-[6px] flex items-center justify-center">
-                <Shield className="w-4 h-4 text-cyan-400" />
-              </div>
+        <div className="h-16 px-5 flex items-center justify-between border-b border-slate-800">
+          <NavLink to="/dashboard" onClick={handleNavClick} className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400">
+              <Shield className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-display font-bold text-base tracking-tight text-white flex items-center gap-1">
-                Vision<span className="text-cyan-400">Guard</span>
-                <span className="text-[9px] px-1 py-0.2 rounded bg-cyan-500/10 text-cyan-400 font-mono border border-cyan-500/20">
-                  AI
-                </span>
+              <span className="font-bold text-sm tracking-wide text-white flex items-center gap-1.5 font-sans">
+                VISION<span className="text-sky-400">GUARD</span>
               </span>
+              <p className="text-[10px] text-slate-400 font-mono tracking-wider">SAFETY CONTROL CENTER</p>
             </div>
           </NavLink>
         </div>
 
-        {/* Quick Launch Button */}
-        <div className="px-4 pt-4 pb-2">
+        {/* Quick Launch CTA */}
+        <div className="p-3">
           <NavLink
-            to="/inspect"
+            to="/inspections/new"
             onClick={handleNavClick}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-semibold text-xs transition-all shadow-[0_0_15px_rgba(6,182,212,0.25)] hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs transition shadow-sm"
           >
-            <Plus className="w-4 h-4 stroke-[3]" />
-            <span>+ NEW INSPECTION</span>
+            <PlusCircle className="w-4 h-4" />
+            <span>+ New Inspection</span>
           </NavLink>
         </div>
 
         {/* Navigation Items */}
-        <nav className="px-3 py-3 space-y-1">
-          <div className="px-3 pb-1 text-[10px] font-mono uppercase tracking-wider text-slate-500">
-            Navigation
+        <nav className="px-3 py-1 space-y-0.5">
+          <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider text-slate-400">
+            Control Center
           </div>
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -115,34 +119,28 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
                 to={item.path}
                 onClick={handleNavClick}
                 className={({ isActive }) =>
-                  `flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all group ${
+                  `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
                     isActive
-                      ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] font-semibold'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                      ? 'bg-slate-800/90 text-white border-l-2 border-sky-400 font-semibold pl-2.5'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <Icon
-                        className={`w-4 h-4 transition-colors ${
-                          isActive
-                            ? 'text-cyan-400'
-                            : 'text-slate-400 group-hover:text-slate-200'
+                        className={`w-4 h-4 ${
+                          isActive ? 'text-sky-400' : 'text-slate-400'
                         }`}
                       />
                       <span>{item.name}</span>
                     </div>
 
                     {item.badge && (
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                      <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
                         {item.badge}
                       </span>
-                    )}
-
-                    {isActive && !item.badge && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
                     )}
                   </>
                 )}
@@ -152,16 +150,39 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
         </nav>
       </div>
 
-      {/* User Section & Logout */}
-      <div className="p-3 border-t border-slate-850 bg-slate-950/60">
-        <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800/80 flex items-center justify-between">
+      {/* Bottom Section: System Status & User Profile */}
+      <div className="p-3 border-t border-slate-850 space-y-3 bg-slate-950">
+        {/* System Health Telemetry */}
+        <div className="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800/80 text-[11px] font-mono space-y-1.5">
+          <div className="flex items-center justify-between text-slate-400">
+            <span>System Status</span>
+            <span className="text-[10px] text-slate-400">42ms</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-slate-300 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              AI Engine
+            </span>
+            <span className="text-emerald-400 font-medium">Online</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-slate-300 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              Vision API
+            </span>
+            <span className="text-emerald-400 font-medium">Connected</span>
+          </div>
+        </div>
+
+        {/* User Card */}
+        <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between">
           <NavLink
             to="/profile"
             onClick={handleNavClick}
-            className="flex items-center gap-2.5 min-w-0 flex-1 hover:opacity-85 transition"
+            className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-85 transition"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-600 to-blue-700 flex items-center justify-center text-white font-bold text-xs shrink-0 border border-cyan-400/40">
-              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+            <div className="w-7 h-7 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-sky-400 font-bold text-xs shrink-0">
+              <User className="w-3.5 h-3.5" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-slate-200 truncate">
@@ -176,9 +197,9 @@ export const Sidebar = ({ isMobile = false, onCloseMobile }) => {
           <button
             onClick={handleLogout}
             title="Sign Out"
-            className="p-1.5 rounded-md text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition ml-1"
+            className="p-1.5 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>

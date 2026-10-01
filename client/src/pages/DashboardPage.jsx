@@ -1,467 +1,363 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { inspectionService } from '../services/inspectionService';
-import { StatCard } from '../components/common/StatCard';
-import { RiskBadge } from '../components/common/RiskBadge';
-import { EmptyState } from '../components/common/EmptyState';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useInspections } from '../context/InspectionContext';
 import {
-  ScanEye,
+  ClipboardList,
   AlertTriangle,
   Flame,
-  CheckCircle2,
-  Plus,
   ShieldCheck,
-  History,
-  BarChart3,
-  Sparkles,
+  Plus,
+  ArrowRight,
   ChevronRight,
+  Activity,
+  CheckCircle2,
+  Clock,
+  Filter,
+  Layers,
+  Server,
+  Database,
+  Cpu,
+  Radio,
 } from 'lucide-react';
 
 export const DashboardPage = () => {
-  const { user } = useAuth();
-  const [inspections, setInspections] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [metrics, setMetrics] = useState({
-    total: 0,
-    issuesDetected: 0,
-    highRisk: 0,
-    avgConfidence: 0,
-    riskBreakdown: { low: 0, medium: 0, high: 0, critical: 0 },
+  const { inspections, getStats } = useInspections();
+  const navigate = useNavigate();
+  const [selectedSiteFilter, setSelectedSiteFilter] = useState('ALL');
+
+  const stats = getStats();
+
+  const filteredInspections = inspections.filter((insp) => {
+    if (selectedSiteFilter === 'ALL') return true;
+    return insp.site.includes(selectedSiteFilter);
   });
 
-  const calculateMetrics = (list) => {
-    if (!list || list.length === 0) {
-      setMetrics({
-        total: 0,
-        issuesDetected: 0,
-        highRisk: 0,
-        avgConfidence: 0,
-        riskBreakdown: { low: 0, medium: 0, high: 0, critical: 0 },
-      });
-      return;
+  const getSeverityBadge = (severity) => {
+    const s = (severity || 'LOW').toUpperCase();
+    if (s === 'CRITICAL') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+          CRITICAL
+        </span>
+      );
     }
-
-    let issuesCount = 0;
-    let highRiskCount = 0;
-    let totalConf = 0;
-    const breakdown = { low: 0, medium: 0, high: 0, critical: 0 };
-
-    list.forEach((item) => {
-      const risk = (item.risk || item.risk_level || 'LOW').toLowerCase();
-      if (breakdown[risk] !== undefined) {
-        breakdown[risk] += 1;
-      }
-
-      if (risk === 'high' || risk === 'critical') {
-        highRiskCount += 1;
-      }
-
-      const issues = (item.anomalies?.length || 0) + (item.detections?.length || 0);
-      issuesCount += issues > 0 ? issues : (risk !== 'low' ? 1 : 0);
-
-      const conf = item.confidence || item.confidence_score || 0;
-      totalConf += conf <= 1 ? conf * 100 : conf;
-    });
-
-    setMetrics({
-      total: list.length,
-      issuesDetected: issuesCount,
-      highRisk: highRiskCount,
-      avgConfidence: list.length > 0 ? Math.round(totalConf / list.length) : 0,
-      riskBreakdown: breakdown,
-    });
+    if (s === 'HIGH') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+          HIGH
+        </span>
+      );
+    }
+    if (s === 'MEDIUM') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/30">
+          MEDIUM
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30">
+        LOW / SAFE
+      </span>
+    );
   };
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      setLoading(true);
-      try {
-        const data = await inspectionService.getInspections({ limit: 5 });
-        const list = Array.isArray(data) ? data : data.inspections || [];
-        setInspections(list);
-        calculateMetrics(list);
-      } catch (err) {
-        console.info('Fetching from local audit cache:', err.message);
-        const localList = JSON.parse(localStorage.getItem('vg_inspections_history') || '[]');
-        setInspections(localList);
-        calculateMetrics(localList);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, []);
-
   return (
-    <div className="space-y-8">
-      {/* Top Welcome Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-850">
+    <div className="space-y-6">
+      {/* Dashboard Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold font-display text-white">
-            Welcome back, {user?.name || 'Inspector'}
+          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            Dashboard Overview
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Here's your visual inspection overview.
+          <p className="text-xs text-slate-400 mt-0.5">
+            Monitor inspection activity, hazards, and compliance.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            to="/inspect"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)]"
+          {/* Site Filter */}
+          <select
+            value={selectedSiteFilter}
+            onChange={(e) => setSelectedSiteFilter(e.target.value)}
+            className="py-1.5 px-2.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 font-mono focus:outline-none"
           >
-            <Plus className="w-4 h-4 stroke-[3]" />
+            <option value="ALL">All Project Sites</option>
+            <option value="Apex Tower">Apex Tower</option>
+            <option value="Harbor Gateway">Harbor Gateway</option>
+            <option value="Eastside Medical">Eastside Medical</option>
+            <option value="Industrial Park">Industrial Park</option>
+          </select>
+
+          <Link
+            to="/inspections/new"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition shadow-sm"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[3]" />
             <span>+ New Inspection</span>
           </Link>
         </div>
       </div>
 
-      {/* KPI Stat Cards */}
+      {/* Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Total Inspections"
-          value={metrics.total}
-          subtitle="Processed through Vision AI"
-          icon={ScanEye}
-          accent="cyan"
-          loading={loading}
-        />
-        <StatCard
-          title="Issues Detected"
-          value={metrics.issuesDetected}
-          subtitle="Anomalies & violations flagged"
-          icon={AlertTriangle}
-          accent="amber"
-          loading={loading}
-        />
-        <StatCard
-          title="High Risk Findings"
-          value={metrics.highRisk}
-          subtitle="Critical & high severity alerts"
-          icon={Flame}
-          accent="rose"
-          loading={loading}
-        />
-        <StatCard
-          title="Average Confidence"
-          value={metrics.avgConfidence > 0 ? `${metrics.avgConfidence}%` : '--'}
-          subtitle="Model certainty score"
-          icon={ShieldCheck}
-          accent="emerald"
-          loading={loading}
-        />
+        {/* Total Inspections */}
+        <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+          <div className="flex items-center justify-between text-xs font-mono text-slate-400">
+            <span>TOTAL INSPECTIONS</span>
+            <ClipboardList className="w-4 h-4 text-sky-400" />
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-bold font-mono text-white">{stats.total}</span>
+            <span className="text-[11px] text-emerald-400 font-mono">Completed</span>
+          </div>
+          <p className="text-[11px] text-slate-400">Active site surveillance records</p>
+        </div>
+
+        {/* Critical Hazards */}
+        <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+          <div className="flex items-center justify-between text-xs font-mono text-slate-400">
+            <span>CRITICAL HAZARDS</span>
+            <Flame className="w-4 h-4 text-rose-400" />
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-bold font-mono text-rose-400">{stats.criticalHazards}</span>
+            <span className="text-[11px] text-rose-400 font-mono">Immediate Action</span>
+          </div>
+          <p className="text-[11px] text-slate-400">Imminent structural / safety threats</p>
+        </div>
+
+        {/* Open Issues */}
+        <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+          <div className="flex items-center justify-between text-xs font-mono text-slate-400">
+            <span>OPEN ISSUES</span>
+            <AlertTriangle className="w-4 h-4 text-amber-400" />
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-bold font-mono text-amber-400">{stats.openIssues}</span>
+            <span className="text-[11px] text-amber-400 font-mono">Pending Remediation</span>
+          </div>
+          <p className="text-[11px] text-slate-400">Assigned corrective action items</p>
+        </div>
+
+        {/* Compliance Rate */}
+        <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+          <div className="flex items-center justify-between text-xs font-mono text-slate-400">
+            <span>COMPLIANCE RATE</span>
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-bold font-mono text-emerald-400">{stats.complianceRate}</span>
+            <span className="text-[11px] text-slate-400 font-mono">OSHA Benchmark</span>
+          </div>
+          <p className="text-[11px] text-slate-400">Resolved safety items proportion</p>
+        </div>
       </div>
 
-      {/* Grid: Risk Overview & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Risk Overview Breakdown */}
-        <div className="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
+      {/* Grid: Inspection Activity & Hazard Distribution */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Inspection Activity Trend Chart */}
+        <div className="lg:col-span-8 p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
+          <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-slate-200">
-                Risk Severity Breakdown
-              </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Distribution of hazard levels across completed visual audits
-              </p>
+              <h3 className="text-sm font-bold text-slate-200">Inspection Activity</h3>
+              <p className="text-xs text-slate-400">Weekly visual inspection volume & completed audits</p>
             </div>
-            <span className="text-xs font-mono text-cyan-400">
-              {metrics.total} TOTAL
-            </span>
+            <span className="text-xs font-mono text-slate-400">LAST 7 DAYS</span>
           </div>
 
-          {metrics.total === 0 && !loading ? (
-            <div className="py-8 text-center text-xs text-slate-500 font-mono">
-              No inspections logged yet. Run an inspection to populate risk distribution.
+          {/* Clean Activity Bar Visualization */}
+          <div className="pt-2">
+            <div className="h-44 flex items-end justify-between gap-3 px-2 border-b border-slate-800 pb-2">
+              {[
+                { day: 'Mon', count: 12, critical: 2 },
+                { day: 'Tue', count: 18, critical: 4 },
+                { day: 'Wed', count: 15, critical: 1 },
+                { day: 'Thu', count: 24, critical: 6 },
+                { day: 'Fri', count: 28, critical: 3 },
+                { day: 'Sat', count: 14, critical: 2 },
+                { day: 'Sun', count: 8, critical: 0 },
+              ].map((bar, idx) => (
+                <div key={idx} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                  <div className="text-[10px] font-mono text-slate-400 opacity-0 group-hover:opacity-100 transition">
+                    {bar.count}
+                  </div>
+                  <div className="w-full bg-slate-800 rounded-t overflow-hidden flex flex-col justify-end" style={{ height: `${(bar.count / 30) * 100}%` }}>
+                    {bar.critical > 0 && (
+                      <div
+                        className="w-full bg-rose-500/80"
+                        style={{ height: `${(bar.critical / bar.count) * 100}%` }}
+                        title={`${bar.critical} Critical`}
+                      />
+                    )}
+                    <div className="w-full bg-sky-500/80 flex-1" />
+                  </div>
+                  <span className="text-[11px] font-mono text-slate-400">{bar.day}</span>
+                </div>
+              ))}
             </div>
-          ) : (
-            <div className="space-y-3.5 pt-2">
-              {/* Critical */}
-              <div>
-                <div className="flex justify-between text-xs font-mono mb-1">
-                  <span className="text-rose-400 font-semibold flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
-                    CRITICAL HAZARD
-                  </span>
-                  <span className="text-slate-300">
-                    {metrics.riskBreakdown.critical} (
-                    {metrics.total > 0
-                      ? Math.round((metrics.riskBreakdown.critical / metrics.total) * 100)
-                      : 0}
-                    %)
-                  </span>
-                </div>
-                <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                  <div
-                    className="bg-rose-500 h-full rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(244,63,94,0.5)]"
-                    style={{
-                      width: `${
-                        metrics.total > 0
-                          ? (metrics.riskBreakdown.critical / metrics.total) * 100
-                          : 0
-                      }%`,
-                    }}
-                  />
-                </div>
-              </div>
 
-              {/* High */}
-              <div>
-                <div className="flex justify-between text-xs font-mono mb-1">
-                  <span className="text-orange-400 font-semibold flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(251,146,60,0.8)]" />
-                    HIGH RISK
-                  </span>
-                  <span className="text-slate-300">
-                    {metrics.riskBreakdown.high} (
-                    {metrics.total > 0
-                      ? Math.round((metrics.riskBreakdown.high / metrics.total) * 100)
-                      : 0}
-                    %)
-                  </span>
-                </div>
-                <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                  <div
-                    className="bg-orange-500 h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${
-                        metrics.total > 0
-                          ? (metrics.riskBreakdown.high / metrics.total) * 100
-                          : 0
-                      }%`,
-                    }}
-                  />
-                </div>
+            <div className="flex items-center justify-between text-xs text-slate-400 font-mono pt-3">
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-sky-500" />
+                  Standard Audits
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-rose-500" />
+                  Critical Violations
+                </span>
               </div>
-
-              {/* Medium */}
-              <div>
-                <div className="flex justify-between text-xs font-mono mb-1">
-                  <span className="text-amber-400 font-semibold flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    MEDIUM RISK
-                  </span>
-                  <span className="text-slate-300">
-                    {metrics.riskBreakdown.medium} (
-                    {metrics.total > 0
-                      ? Math.round((metrics.riskBreakdown.medium / metrics.total) * 100)
-                      : 0}
-                    %)
-                  </span>
-                </div>
-                <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                  <div
-                    className="bg-amber-500 h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${
-                        metrics.total > 0
-                          ? (metrics.riskBreakdown.medium / metrics.total) * 100
-                          : 0
-                      }%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Low */}
-              <div>
-                <div className="flex justify-between text-xs font-mono mb-1">
-                  <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    LOW RISK (SAFE)
-                  </span>
-                  <span className="text-slate-300">
-                    {metrics.riskBreakdown.low} (
-                    {metrics.total > 0
-                      ? Math.round((metrics.riskBreakdown.low / metrics.total) * 100)
-                      : 0}
-                    %)
-                  </span>
-                </div>
-                <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                  <div
-                    className="bg-emerald-500 h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${
-                        metrics.total > 0
-                          ? (metrics.riskBreakdown.low / metrics.total) * 100
-                          : 0
-                      }%`,
-                    }}
-                  />
-                </div>
-              </div>
+              <span>AVG INFERENCE: 840MS</span>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Quick Actions Panel */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-6 flex flex-col justify-between">
+        {/* Hazard Distribution Breakdown */}
+        <div className="lg:col-span-4 p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4 flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-slate-200 mb-1">
-              Quick Operations
-            </h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Direct pathways to core visual intelligence modules
-            </p>
-
-            <div className="space-y-2.5">
-              <Link
-                to="/inspect"
-                className="w-full flex items-center justify-between p-3 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-semibold transition group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Sparkles className="w-4 h-4 text-cyan-400" />
-                  <span>Start Visual Inspection</span>
-                </div>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition" />
-              </Link>
-
-              <Link
-                to="/history"
-                className="w-full flex items-center justify-between p-3 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-medium transition group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <History className="w-4 h-4 text-slate-400" />
-                  <span>Browse Inspection Logs</span>
-                </div>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition" />
-              </Link>
-
-              <Link
-                to="/analytics"
-                className="w-full flex items-center justify-between p-3 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-medium transition group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <BarChart3 className="w-4 h-4 text-slate-400" />
-                  <span>View Telemetry Analytics</span>
-                </div>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition" />
-              </Link>
-            </div>
+            <h3 className="text-sm font-bold text-slate-200">Hazard Distribution</h3>
+            <p className="text-xs text-slate-400">Severity tier breakdown across sites</p>
           </div>
 
-          <div className="pt-4 mt-4 border-t border-slate-800 text-[11px] font-mono text-slate-500 flex items-center justify-between">
-            <span>CORE STATUS: SYNCHRONIZED</span>
-            <span className="text-cyan-400">LATENCY 42MS</span>
+          <div className="space-y-3">
+            {[
+              { label: 'Critical Hazards', count: stats.riskCounts.CRITICAL, color: 'bg-rose-500', text: 'text-rose-400' },
+              { label: 'High Risk', count: stats.riskCounts.HIGH, color: 'bg-amber-500', text: 'text-amber-400' },
+              { label: 'Medium Risk', count: stats.riskCounts.MEDIUM, color: 'bg-yellow-500', text: 'text-yellow-400' },
+              { label: 'Low / Safe', count: stats.riskCounts.LOW, color: 'bg-emerald-500', text: 'text-emerald-400' },
+            ].map((row) => {
+              const pct = stats.total > 0 ? Math.round((row.count / stats.total) * 100) : 0;
+              return (
+                <div key={row.label} className="space-y-1">
+                  <div className="flex justify-between text-xs font-mono">
+                    <span className={row.text}>{row.label}</span>
+                    <span className="text-slate-300 font-semibold">{row.count} ({pct}%)</span>
+                  </div>
+                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                    <div className={`${row.color} h-full rounded-full`} style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="pt-2 border-t border-slate-800">
+            <Link
+              to="/hazards"
+              className="text-xs text-sky-400 hover:text-sky-300 font-mono flex items-center justify-between"
+            >
+              <span>Manage All Open Hazards</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Recent Inspections Table */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden">
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-slate-200">
-              Recent Inspections
-            </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Latest image scans, risk ratings, and AI diagnostic reports
-            </p>
+      {/* Grid: Recent Inspections & System Health */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Recent Inspections Table */}
+        <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-slate-200">Recent Inspections</h3>
+              <p className="text-xs text-slate-400">Latest site scans and audit outcomes</p>
+            </div>
+            <Link
+              to="/inspections"
+              className="text-xs font-mono text-sky-400 hover:underline flex items-center gap-1"
+            >
+              <span>View All</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
 
-          <Link
-            to="/history"
-            className="text-xs font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
-          >
-            <span>View All History</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        {loading ? (
-          <div className="p-8 text-center">
-            <div className="w-8 h-8 border-2 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin mx-auto mb-2" />
-            <p className="text-xs font-mono text-slate-400">Loading audit history...</p>
-          </div>
-        ) : inspections.length === 0 ? (
-          <div className="p-6">
-            <EmptyState
-              icon={ScanEye}
-              title="No Inspections Logged Yet"
-              description="Upload an image to trigger VisionGuard's automated hazard analysis and anomaly detection."
-              actionText="+ Start First Inspection"
-              actionLink="/inspect"
-            />
-          </div>
-        ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950/80 text-slate-400 uppercase font-mono border-b border-slate-800">
+              <thead className="bg-slate-950 text-slate-400 font-mono uppercase border-b border-slate-800">
                 <tr>
-                  <th className="py-3 px-4">Date</th>
-                  <th className="py-3 px-4">Inspection / Target</th>
-                  <th className="py-3 px-4">Category</th>
-                  <th className="py-3 px-4">Risk Level</th>
-                  <th className="py-3 px-4">Confidence</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Action</th>
+                  <th className="py-2.5 px-4">Inspection ID</th>
+                  <th className="py-2.5 px-4">Location / Site</th>
+                  <th className="py-2.5 px-4">Date</th>
+                  <th className="py-2.5 px-4">Inspector</th>
+                  <th className="py-2.5 px-4">Risk Level</th>
+                  <th className="py-2.5 px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-mono">
-                {inspections.slice(0, 5).map((item, idx) => {
-                  const dateStr = item.createdAt || item.timestamp || '';
-                  const formattedDate = dateStr
-                    ? new Date(dateStr).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })
-                    : 'Recent';
-                  const risk = item.risk || item.risk_level || 'LOW';
-                  const category = item.category || 'General Inspection';
-                  const title = item.title || item.fileName || `Inspection #${item.id?.slice?.(0, 6) || idx + 1}`;
-                  const confidence = item.confidence || item.confidence_score || 95;
-
-                  return (
-                    <tr
-                      key={item.id || idx}
-                      className="hover:bg-slate-850/40 transition group"
-                    >
-                      <td className="py-3.5 px-4 text-slate-400 whitespace-nowrap">
-                        {formattedDate}
-                      </td>
-                      <td className="py-3.5 px-4 font-sans font-medium text-slate-200">
-                        <div className="flex items-center gap-2">
-                          <span className="truncate max-w-[200px]">{title}</span>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4 text-slate-300 whitespace-nowrap">
-                        <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 text-[11px]">
-                          {category}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <RiskBadge level={risk} size="sm" />
-                      </td>
-                      <td className="py-3.5 px-4 text-cyan-400 font-semibold whitespace-nowrap">
-                        {confidence <= 1 ? Math.round(confidence * 100) : Math.round(confidence)}%
-                      </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 text-emerald-400 text-[11px]">
-                          <CheckCircle2 className="w-3 h-3" />
-                          <span>Analyzed</span>
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                        <Link
-                          to={`/inspection/${item.id || 'current'}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-200 text-xs font-semibold transition"
-                        >
-                          <span>View Report</span>
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {filteredInspections.slice(0, 4).map((insp) => (
+                  <tr
+                    key={insp.id}
+                    onClick={() => navigate(`/inspections/${insp.id}`)}
+                    className="hover:bg-slate-800/40 cursor-pointer transition"
+                  >
+                    <td className="py-3 px-4 font-semibold text-sky-400">{insp.id}</td>
+                    <td className="py-3 px-4 font-sans text-slate-200 truncate max-w-[180px]">
+                      {insp.site}
+                    </td>
+                    <td className="py-3 px-4 text-slate-400 whitespace-nowrap">
+                      {new Date(insp.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </td>
+                    <td className="py-3 px-4 text-slate-300 font-sans">{insp.inspector}</td>
+                    <td className="py-3 px-4 whitespace-nowrap">{getSeverityBadge(insp.riskLevel)}</td>
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <Link
+                        to={`/inspections/${insp.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="px-2.5 py-1 rounded bg-slate-800 hover:bg-sky-500 hover:text-slate-950 text-slate-200 text-xs font-semibold transition"
+                      >
+                        Inspect
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-        )}
+        </div>
+
+        {/* System Health Status Panel */}
+        <div className="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+          <div>
+            <h3 className="text-sm font-bold text-slate-200">System Infrastructure</h3>
+            <p className="text-xs text-slate-400">Core neural & database operational status</p>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              { name: 'AI Vision Neural Engine', sub: 'Gemini 2.5 Flash Multimodal', status: 'Operational', icon: Cpu },
+              { name: 'Vision API Gateway', sub: 'Express Ingestion Buffer', status: 'Operational', icon: Radio },
+              { name: 'Backend Cluster', sub: 'Node.js Core Microservice', status: 'Operational', icon: Server },
+              { name: 'PostgreSQL Database', sub: 'Supabase Data Matrix', status: 'Operational', icon: Database },
+            ].map((srv, idx) => {
+              const Icon = srv.icon;
+              return (
+                <div key={idx} className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded bg-slate-900 border border-slate-800 text-slate-300">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-200">{srv.name}</p>
+                      <p className="text-[10px] text-slate-400">{srv.sub}</p>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-400 font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    {srv.status}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="pt-2 text-[11px] font-mono text-slate-400 flex items-center justify-between">
+            <span>UPTIME: 99.98%</span>
+            <span>ENCRYPTED (256-BIT)</span>
+          </div>
+        </div>
       </div>
     </div>
   );
