@@ -5,89 +5,90 @@
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     
-    /* Industrial Safety Light Palette */
-    --bg-primary: #F8FAFC;
-    --bg-sidebar: #0F172A;
-    --bg-card: #FFFFFF;
-    --border-color: #E2E8F0;
-    --border-strong: #CBD5E1;
+    /* Industrial Safety Dark Operations Palette */
+    --bg-primary: #0B1120;
+    --bg-sidebar: #060B14;
+    --bg-card: #0F172A;
+    --border-color: #1E293B;
+    --border-strong: #334155;
     
-    --text-primary: #0F172A;
-    --text-secondary: #475569;
-    --text-muted: #94A3B8;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
     
     --color-accent: #0284C7;
     --color-accent-hover: #0369A1;
-    --color-success: #16A34A;
-    --color-warning: #EA580C;
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
     --color-caution: #D97706;
-    --color-critical: #DC2626;
+    --color-critical: #EF4444;
   }
 
   body {
     font-family: var(--font-sans);
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
+    background-color: #0B1120;
+    color: #F8FAFC;
     overflow-x: hidden;
   }
 
-  /* Subtle Clean Scrollbar */
+  /* Dark Theme Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #F1F5F9;
+    background: #0B1120;
   }
   ::-webkit-scrollbar-thumb {
-    background: #CBD5E1;
+    background: #1E293B;
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #94A3B8;
+    background: #334155;
   }
 }
 
-/* Reusable Industrial Enterprise UI Classes */
+/* Reusable Industrial Enterprise UI Classes (Dark Mode) */
 .vg-card {
-  background-color: #FFFFFF;
-  border: 1px solid #E2E8F0;
+  background-color: #0F172A;
+  border: 1px solid #1E293B;
   border-radius: 6px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
 }
 
 .vg-card-hover {
-  background-color: #FFFFFF;
-  border: 1px solid #E2E8F0;
+  background-color: #0F172A;
+  border: 1px solid #1E293B;
   border-radius: 6px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 .vg-card-hover:hover {
-  border-color: #CBD5E1;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06);
+  border-color: #38BDF8;
+  box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.4);
 }
 
 .vg-btn-primary {
   background-color: #0284C7;
   color: #FFFFFF;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 13px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 6px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 }
 .vg-btn-primary:hover {
   background-color: #0369A1;
 }
 
 .vg-btn-secondary {
-  background-color: #FFFFFF;
-  color: #334155;
-  border: 1px solid #CBD5E1;
+  background-color: #1E293B;
+  color: #F1F5F9;
+  border: 1px solid #334155;
   font-weight: 500;
   font-size: 13px;
   padding: 6px 12px;
@@ -95,16 +96,16 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .vg-btn-secondary:hover {
-  background-color: #F8FAFC;
-  border-color: #94A3B8;
-  color: #0F172A;
+  background-color: #334155;
+  border-color: #475569;
+  color: #FFFFFF;
 }
 
 .vg-btn-ghost {
-  color: #475569;
+  color: #94A3B8;
   font-size: 13px;
   font-weight: 500;
   padding: 6px 10px;
@@ -112,8 +113,8 @@
   transition: color 0.15s ease, background-color 0.15s ease;
 }
 .vg-btn-ghost:hover {
-  color: #0F172A;
-  background-color: #F1F5F9;
+  color: #FFFFFF;
+  background-color: #1E293B;
 }
 
 .vg-badge-critical {
@@ -125,9 +126,9 @@
   font-size: 11px;
   font-weight: 600;
   font-family: var(--font-mono);
-  background-color: #FEF2F2;
-  color: #DC2626;
-  border: 1px solid #FECACA;
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
 }
 
 .vg-badge-high {
@@ -139,9 +140,9 @@
   font-size: 11px;
   font-weight: 600;
   font-family: var(--font-mono);
-  background-color: #FFF7ED;
-  color: #EA580C;
-  border: 1px solid #FFEDD5;
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
 }
 
 .vg-badge-medium {
@@ -153,9 +154,9 @@
   font-size: 11px;
   font-weight: 600;
   font-family: var(--font-mono);
-  background-color: #FEFCE8;
-  color: #CA8A04;
-  border: 1px solid #FEF08A;
+  background-color: rgba(234, 179, 8, 0.15);
+  color: #FACC15;
+  border: 1px solid rgba(234, 179, 8, 0.35);
 }
 
 .vg-badge-safe {
@@ -167,9 +168,9 @@
   font-size: 11px;
   font-weight: 600;
   font-family: var(--font-mono);
-  background-color: #F0FDF4;
-  color: #16A34A;
-  border: 1px solid #BBF7D0;
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
 }
 
 /* Background Animations & Industrial Pattern Utilities */
